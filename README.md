@@ -50,18 +50,19 @@ Projeto Financeiro - Alchemy/
 ├── run.py                # Arquivo principal para executar o sistema
 ├── main.py               # Menus do sistema
 │
-├── database/
-│   └── connection.py    # Gerenciador de conexão com o banco
+├── configs/
+│   └── base.py          # Declaração de Base
+|   └── connection.py    # Gerenciador de conexão com o banco
 │
 ├── models/
 │   ├── users.py         # Model de usuários
-│   ├── accounts.py     # Model de contas
-│   └── transactions.py # Model de transações
+│   ├── contas.py     # Model de contas
+│   └── transacoes.py # Model de transações
 │
 ├── services/
 │   ├── users_repository.py
-│   ├── accounts_repository.py
-│   └── transactions_repository.py
+│   ├── contas_repository.py
+│   └── transacao_repository.py
 │
 └── README.md
 ```
@@ -74,7 +75,7 @@ Projeto Financeiro - Alchemy/
   
   # Crie o banco de dados
 - CREATE DATABASE finance_core;
-- Crie e coloque sua engine no arquivo connecrion.py
+- Crie e coloque sua engine no arquivo connection.py
   
   # Execute o run.py
 
