@@ -29,7 +29,6 @@ Tudo organizado em estrutura de serviços + repositórios, com menu interativo n
 - Registrar transações (entrada e saída)
 - Listar transações
 - Deletar transações
-- Resetar tabela de transações
 
 ---
 
