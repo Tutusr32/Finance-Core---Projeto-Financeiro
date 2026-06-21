@@ -5,127 +5,62 @@ from sqlalchemy.exc import NoResultFound
 from models.users import Users
 
 class ContasRepository:
-    def select(self):
-        while True:
-            with DBConnectionHandler() as db:
-                try:
-                    user_id = int(input("Digite o ID do usuário: "))
-                    conta_id = int(input("Digite o ID da conta: "))
-
-                    data = (
-                        db.session
-                        .query(Contas)
-                        .options(joinedload(Contas.user))
-                        .filter(Contas.user_id == user_id)
-                        .filter(Contas.id == conta_id)
-                        .one()
+    def get_by_id_and_user(self, session, user_id, conta_id):
+        return (session
+                .query(Contas)
+                .options(joinedload(Contas.user))
+                .filter(
+                    Contas.user_id == user_id,
+                    Contas.id == conta_id
                     )
+                .first())
+    
 
-                    print(data)
+    def create_account(self, session, user_id, nome, saldo):
+        session.query(Contas).options(joinedload(Contas.user))
+        
+        conta = Contas(user_id=user_id, nome=nome, saldo=saldo)
 
-                except ValueError:
-                    print("Digite apenas números.")
+        session.add(conta)
+        session.commit()
+        session.refresh(conta)
 
-                except NoResultFound:
-                    print("Conta ou usuário não encontrado.")
+        return conta
 
-            if input("Continuar? (S/N): ").upper() != "S":
-                break
+    def update_account(self, session, conta_id, nome=None, saldo=None):
+        conta = session.query(Contas).filter(Contas.id == conta_id).first()
 
-    def insert(self):
+        if not conta:
+            return None
 
-        while True:
-            with DBConnectionHandler() as db:
-                try:
-                    user_id = int(input("ID do usuário: "))
+        if nome:
+            conta.nome = nome
 
-                    user = db.session.query(Users).filter(Users.id == user_id).first()
+        if saldo is not None:
+            conta.saldo = saldo
 
-                    if not user:
-                        print("Usuário não existe.")
-                        continue
+        session.commit()
+        session.refresh(conta)
 
-                    nome = input("Nome da conta: ")
-                    saldo = int(input("Saldo inicial: "))
+        return conta
 
-                    conta = Contas(user_id=user_id, nome=nome, saldo=saldo)
+    
+    def delete_account(self, session, conta_id):
+        conta = session.query(Contas).filter(Contas.id == conta_id).first()
 
-                    db.session.add(conta)
-                    db.session.commit()
+        data = {
+        "id": conta.id,
+        "user_id": conta.user_id,
+        "nome_usuario": conta.user.nome,
+        "nome": conta.nome,
+        "saldo": conta.saldo
+            }
 
-                    print("Conta criada.")
+        if not conta:
+            return None
 
-                except ValueError:
-                    print("Digite valores válidos.")
+        session.delete(conta)
+        session.commit()
 
-                except Exception as e:
-                    db.session.rollback()
-                    raise e
-
-            if input("Continuar? (S/N): ").upper() != "S":
-                break
-
-    def update(self):
-        while True:
-            with DBConnectionHandler() as db:
-                try:
-                    id = int(input("ID da conta: "))
-
-                    conta = db.session.query(Contas).filter(Contas.id == id).first()
-
-                    if not conta:
-                        print("Conta não existe.")
-                        continue
-
-                    print("1 - Nome\n2 - Saldo")
-                    opcao = int(input("Opção: "))
-
-                    if opcao == 1:
-                        conta.nome = input("Novo nome: ")
-
-                    elif opcao == 2:
-                        conta.saldo = int(input("Novo saldo: "))
-
-                    else:
-                        print("Opção inválida.")
-                        continue
-
-                    db.session.commit()
-                    print("Atualizado.")
-
-                except ValueError:
-                    print("Digite valores válidos.")
-
-                except Exception as e:
-                    db.session.rollback()
-                    raise e
-
-            if input("Continuar? (S/N): ").upper() != "S":
-                break
-
-    def delete(self):
-        while True:
-            with DBConnectionHandler() as db:
-                try:
-                    id = int(input("ID da conta: "))
-
-                    conta = db.session.query(Contas).filter(Contas.id == id).first()
-
-                    if not conta:
-                        print("Conta não existe.")
-                        continue
-
-                    db.session.delete(conta)
-                    db.session.commit()
-
-                    print("Conta deletada.")
-
-                except ValueError:
-                    print("Digite apenas números.")
-
-                except Exception as e:
-                    db.session.rollback()
-                    raise e
-
-            if input("Continuar? (S/N): ").upper() != "S":
-                break
+        return data
+    

@@ -1,9 +1,10 @@
-from repositories.contas_repository import ContasRepository
 from repositories.transacao_repository import TransacaoRepository
 from services.users_service import UsersService
+from services.accounts_service import ContaService
+from decimal import Decimal
 
 users_service = UsersService()
-contas_repo = ContasRepository()
+contas_service = ContaService()
 trans_repo = TransacaoRepository()
 
 
@@ -55,6 +56,7 @@ def menu_users():
         if opcao == "1":
 
             user_id = int(input("ID do usuário: "))
+            
             user = users_service.buscar_usuario(user_id)
             print(user)
 
@@ -113,16 +115,46 @@ def menu_contas():
         opcao = input("Opção: ").strip()
 
         if opcao == "1":
-            contas_repo.select()
+
+            user_id = int(input("ID do usuário: "))
+            conta_id = int(input("ID da conta: "))
+
+            conta = contas_service.buscar_conta(user_id, conta_id)
+            print(conta)
 
         elif opcao == "2":
-            contas_repo.insert()
+
+            user_id = int(input("ID do usuário: "))
+            nome = input("Nome da Conta: ")
+            saldo = Decimal(input("Saldo Inicial: "))
+            
+            conta = contas_service.criar_conta(user_id, nome, saldo)
+            
+            print(conta)
 
         elif opcao == "3":
-            contas_repo.update()
+            conta_id = int(input("ID da conta: "))
+
+            nome = input("Novo nome (enter manter): ")
+            nome = nome if nome.strip() != "" else None
+
+            saldo_input = input("Novo saldo (enter para manter): ")
+            saldo = None
+
+            if saldo_input.strip() != "":
+                saldo = Decimal(saldo_input)
+
+            conta = contas_service.atualizar_conta(conta_id, nome, saldo)
+            
+            print(conta)
 
         elif opcao == "4":
-            contas_repo.delete()
+            conta_id = int(input("ID da conta para deletar: "))
+
+            resultado = contas_service.deletar_conta(conta_id)
+
+            print("Conta deletada:")
+            print(resultado)
 
         elif opcao == "0":
             break
