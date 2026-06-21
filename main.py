@@ -1,8 +1,8 @@
-from services.users_repository import UsersRepository
-from services.contas_repository import ContasRepository
-from services.transacao_repository import TransacaoRepository
+from repositories.contas_repository import ContasRepository
+from repositories.transacao_repository import TransacaoRepository
+from services.users_service import UsersService
 
-users_repo = UsersRepository()
+users_service = UsersService()
 contas_repo = ContasRepository()
 trans_repo = TransacaoRepository()
 
@@ -53,16 +53,44 @@ def menu_users():
         opcao = input("Opção: ").strip()
 
         if opcao == "1":
-            users_repo.select()
+
+            user_id = int(input("ID do usuário: "))
+            user = users_service.buscar_usuario(user_id)
+            print(user)
 
         elif opcao == "2":
-            users_repo.insert()
+
+            nome = input("Nome: ")
+            email = input("Email: ")
+
+            user = users_service.criar_usuario(nome, email)
+
+            print("Usuário criado:", user)
 
         elif opcao == "3":
-            users_repo.update()
+            user_id = int(input("ID do usuário: "))
+
+            print("1 - Nome\n2 - Email")
+            opcao = int(input("Opção: "))
+
+            nome = None
+            email = None
+
+            if opcao == 1:
+                nome = input("Novo nome: ")
+
+            elif opcao == 2:
+                email = input("Novo email: ")
+
+            user = users_service.atualizar_usuario(user_id, nome, email)
+
+            print("Atualizado:", user)
 
         elif opcao == "4":
-            users_repo.delete()
+            user_id = int(input("ID do usuário: "))
+            print(user)
+            user = users_service.deletar_usuario(user_id)
+
 
         elif opcao == "0":
             break
