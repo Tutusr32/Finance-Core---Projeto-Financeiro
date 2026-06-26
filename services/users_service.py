@@ -1,40 +1,19 @@
 from repositories.users_repository import UsersRepository
-from configs.connection import DBConnectionHandler
+
 
 class UsersService:
 
-    def __init__(self):
-        self.repo = UsersRepository()
+    def __init__(self, repo: UsersRepository):
+        self.repo = repo
 
-    def buscar_usuario(self, user_id):
-        with DBConnectionHandler() as db:
-            user = self.repo.get_by_id(db.session, user_id)
+    def buscar_usuario(self, session, user_id: int):
+        return self.repo.get_by_id(session, user_id)
 
-            if not user:
-                print("Usuário não encontrado.")
-                return
+    def criar_usuario(self, session, nome: str, email: str):
+        return self.repo.create(session, nome, email)
 
-            return user
-        
+    def atualizar_usuario(self, session, user_id: int, nome=None, email=None):
+        return self.repo.update(session, user_id, nome, email)
 
-    def criar_usuario(self, nome: str, email: str):
-        with DBConnectionHandler() as db:
-            return self.repo.create(db.session, nome, email)
-        
-
-    def atualizar_usuario(self, user_id, nome=None, email=None):
-        with DBConnectionHandler() as db:
-            user = self.repo.update(db.session, user_id, nome, email)
-
-            if not user:
-                print("Usuário não encontrado.")
-                return
-
-            return user
-        
-
-    def deletar_usuario(self, user_id):
-        with DBConnectionHandler() as db:
-            user = self.repo.delete_user(db.session, user_id)
-
-            return user
+    def deletar_usuario(self, session, user_id: int):
+        return self.repo.delete(session, user_id)

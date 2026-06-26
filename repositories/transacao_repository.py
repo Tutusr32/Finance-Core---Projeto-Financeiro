@@ -1,4 +1,4 @@
-from configs.connection import DBConnectionHandler
+from core.connection import DBConnectionHandler
 from models.contas import Contas
 from models.transacoes import Transacoes
 from sqlalchemy.orm import joinedload
