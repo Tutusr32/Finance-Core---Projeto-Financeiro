@@ -1,0 +1,36 @@
+# Bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ambiente virtual
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Variáveis de ambiente
+.env
+
+# Banco local / arquivos temporários
+*.sqlite3
+*.db
+
+# Cache de testes
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLAlchemy / Alembic (se usar no futuro)
+alembic/versions/*.pyc
