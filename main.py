@@ -4,16 +4,17 @@ from repositories.users_repository import UsersRepository
 
 from services.users_service import UsersService
 from services.accounts_service import ContaService
+from services.transaction_service import TransactionService
 
 from decimal import Decimal
 
 from core.connection import DBConnectionHandler
 
 trans_repo = TransacaoRepository()
-
 users_repo = UsersRepository()
 contas_repo = ContasRepository()
 
+trans_service = TransactionService(trans_repo)
 users_service = UsersService(users_repo)
 contas_service = ContaService(contas_repo)
 
@@ -64,62 +65,87 @@ def menu_users():
         opcao = input("Opção: ").strip()
 
         if opcao == "1":
-            user_id = int(input("ID do usuário: "))
 
-            with DBConnectionHandler() as db:
-                user = users_service.buscar_usuario(
-                    db.session,
-                    user_id)
+            try:
+                user_id = int(input("ID do usuário: "))
 
-            if not user:
-                print("Usuário não encontrado.")
-            else:
-                print(user)
+                with DBConnectionHandler() as db:
+                    user = users_service.buscar_usuario(
+                        db.session,
+                        user_id
+                    )
 
+                if user:
+                    print(user)
+                else:
+                    print("Usuário não encontrado.")
+
+            except ValueError:
+                print("ID inválido.")
 
         elif opcao == "2":
-            nome = str(input("Nome: "))
-            email = str(input("Email: "))
 
-            with DBConnectionHandler() as db:
-                user = users_service.criar_usuario(
-                    db.session,
-                    nome,
-                    email)
+            try:
+                nome = input("Nome: ")
+                email = input("Email: ")
 
-            print(user)
+                with DBConnectionHandler() as db:
+                    user = users_service.criar_usuario(
+                        db.session,
+                        nome,
+                        email
+                    )
 
-        elif opcao == "3":
-            user_id = int(input("ID do usuário: "))
-
-            nome = str(input("Novo nome (Enter para ignorar): "))
-            email = str(input("Novo Email (Enter para ignorar): "))
-
-            with DBConnectionHandler() as db:
-                user = users_service.atualizar_usuario(
-                    db.session,
-                    user_id,
-                    nome,
-                    email)
-
-            if not user:
-                print("Usuário não encontrado.")
-            else:
                 print(user)
 
+            except ValueError as e:
+                print(e)
+
+        elif opcao == "3":
+
+            try:
+                user_id = int(input("ID do usuário: "))
+
+                nome = input("Novo nome (Enter para manter): ")
+                nome = nome if nome.strip() else None
+
+                email = input("Novo email (Enter para manter): ")
+                email = email if email.strip() else None
+
+                with DBConnectionHandler() as db:
+                    user = users_service.atualizar_usuario(
+                        db.session,
+                        user_id,
+                        nome,
+                        email
+                    )
+
+                if user:
+                    print(user)
+                else:
+                    print("Usuário não encontrado.")
+
+            except ValueError as e:
+                print(e)
+
         elif opcao == "4":
-            user_id = int(input("ID do usuário: "))
-            
-            with DBConnectionHandler() as db:
-                ok = users_service.deletar_usuario(
-                    db.session,
-                    user_id)
 
-            if ok:
-                print("Usuário deletado.")
-            else:
-                print("Usuário não encontrado.")
+            try:
+                user_id = int(input("ID do usuário: "))
 
+                with DBConnectionHandler() as db:
+                    ok = users_service.deletar_usuario(
+                        db.session,
+                        user_id
+                    )
+
+                if ok:
+                    print("Usuário deletado.")
+                else:
+                    print("Usuário não encontrado.")
+
+            except ValueError:
+                print("ID inválido.")
 
         elif opcao == "0":
             break
@@ -144,81 +170,97 @@ def menu_contas():
 
         if opcao == "1":
 
-            user_id = int(input("ID do usuário: "))
-            conta_id = int(input("ID da conta: "))
+            try:
+                user_id = int(input("ID do usuário: "))
+                conta_id = int(input("ID da conta: "))
 
-            with DBConnectionHandler() as db:
-                conta = contas_service.buscar_conta(
-                    db.session,
-                    user_id,
-                    conta_id)
+                with DBConnectionHandler() as db:
+                    conta = contas_service.buscar_conta(
+                        db.session,
+                        user_id,
+                        conta_id
+                    )
 
-            if not conta:
-                print("Conta não encontrada.")
-            else:
-                print(conta)
+                if conta:
+                    print(conta)
+                else:
+                    print("Conta não encontrada.")
 
+            except ValueError:
+                print("IDs inválidos.")
 
         elif opcao == "2":
 
-            user_id = int(input("ID do usuário: "))
-            nome = input("Nome da Conta: ")
-            saldo = Decimal(input("Saldo Inicial: "))
-            
-            with DBConnectionHandler() as db:
-                conta = contas_service.criar_conta(
-                    db.session,
-                    user_id,
-                    nome,
-                    saldo)
+            try:
+                user_id = int(input("ID do usuário: "))
+                nome = input("Nome da conta: ")
+                saldo = Decimal(input("Saldo inicial: "))
 
-            print(conta)
+                with DBConnectionHandler() as db:
+                    conta = contas_service.criar_conta(
+                        db.session,
+                        user_id,
+                        nome,
+                        saldo
+                    )
+
+                print(conta)
+
+            except ValueError as e:
+                print(e)
 
         elif opcao == "3":
-            conta_id = int(input("ID da conta: "))
-
-            nome = input("Novo nome (enter manter): ")
-            nome = nome if nome.strip() != "" else None
-
-            saldo_input = input("Novo saldo (enter para manter): ")
-            saldo = None
-
-            if saldo_input.strip() != "":
-                saldo = Decimal(saldo_input)
 
             try:
+                conta_id = int(input("ID da conta: "))
+
+                nome = input("Novo nome (Enter para manter): ")
+                nome = nome if nome.strip() else None
+
+                saldo_input = input("Novo saldo (Enter para manter): ")
+                saldo = Decimal(saldo_input) if saldo_input.strip() else None
 
                 with DBConnectionHandler() as db:
                     conta = contas_service.atualizar_conta(
                         db.session,
                         conta_id,
                         nome,
-                        saldo)
+                        saldo
+                    )
 
-                if not conta:
-                    print("Conta não encontrada.")
-                else:
+                if conta:
                     print(conta)
+                else:
+                    print("Conta não encontrada.")
 
             except ValueError as e:
                 print(e)
 
         elif opcao == "4":
-            conta_id = int(input("ID da conta para deletar: "))
 
-            with DBConnectionHandler() as db:
-                conta = contas_service.deletar_conta(
-                    db.session,
-                    conta_id)
+            try:
+                conta_id = int(input("ID da conta: "))
 
-            if not conta:
-                print("Conta não encontrada.")
-            else:
-                print("Conta deletada:")
-                print(conta)
+                with DBConnectionHandler() as db:
+                    conta = contas_service.deletar_conta(
+                        db.session,
+                        conta_id
+                    )
+
+                if conta:
+                    print("Conta deletada.")
+                    print(conta)
+                else:
+                    print("Conta não encontrada.")
+
+            except ValueError:
+                print("ID inválido.")
 
         elif opcao == "0":
             break
+
+        else:
+            print("Opção inválida.")
 
 
 def menu_transacoes():
@@ -235,16 +277,68 @@ def menu_transacoes():
         opcao = input("Opção: ").strip()
 
         if opcao == "1":
-            trans_repo.select()
+
+            try:
+                transacao_id = int(input("ID da transação: "))
+
+                with DBConnectionHandler() as db:
+                    transacao = trans_service.get_transaction(
+                        db.session,
+                        transacao_id
+                    )
+
+                if transacao:
+                    print(transacao)
+                else:
+                    print("Transação não encontrada.")
+
+            except ValueError:
+                print("ID inválido.")
 
         elif opcao == "2":
-            trans_repo.insert()
+
+            try:
+                conta_id = int(input("ID da conta: "))
+                valor = Decimal(input("Valor: "))
+                tipo = input("Tipo (E/S): ").strip().upper()
+                categoria = input("Categoria: ")
+
+                with DBConnectionHandler() as db:
+                    transacao, mensagem = trans_service.create_transaction(
+                        db.session,
+                        conta_id,
+                        valor,
+                        tipo,
+                        categoria
+                    )
+
+                print(mensagem)
+
+                if transacao:
+                    print(transacao)
+
+            except ValueError as e:
+                print(e)
 
         elif opcao == "3":
-            trans_repo.delete()
+
+            try:
+                transacao_id = int(input("ID da transação: "))
+
+                with DBConnectionHandler() as db:
+                    ok, mensagem = trans_service.delete_transaction(
+                        db.session,
+                        transacao_id
+                    )
+
+                print(mensagem)
+
+            except ValueError:
+                print("ID inválido.")
 
         elif opcao == "0":
             break
 
         else:
             print("Opção inválida.")
+            
