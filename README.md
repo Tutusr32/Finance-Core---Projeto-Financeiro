@@ -1,102 +1,206 @@
-#  Finance Core - Sistema Financeiro com Python + SQLAlchemy
+# 💰 Finance Core
 
-Projeto backend desenvolvido em Python utilizando SQLAlchemy e MySQL para gerenciar:
+Backend desenvolvido em **Python**, **SQLAlchemy** e **MySQL**, simulando um sistema de gerenciamento financeiro.
 
-- Usuários
-- Contas bancárias
-- Transações financeiras
-
-Tudo organizado em estrutura de serviços + repositórios, com menu interativo no terminal.
+O projeto foi criado para consolidar conceitos de desenvolvimento backend, aplicando boas práticas de arquitetura como **MVC**, **Repository Pattern**, **Service Layer** e **separação de responsabilidades**, servindo como base para futuras evoluções utilizando **FastAPI**.
 
 ---
 
-##  Funcionalidades
+# 🚀 Funcionalidades
 
-###  Usuários
-- Criar usuário
-- Buscar usuário
-- Atualizar usuário
-- Deletar usuário
+## 👤 Usuários
 
-###  Contas
-- Criar conta bancária
-- Listar contas de um usuário
-- Atualizar conta
-- Deletar conta
-- Gerenciar saldo
+* Criar usuário
+* Buscar usuário por ID
+* Atualizar usuário
+* Deletar usuário
 
-###  Transações
-- Registrar transações (entrada e saída)
-- Listar transações
-- Deletar transações
+## 🏦 Contas Bancárias
 
----
+* Criar conta
+* Buscar conta
+* Atualizar conta
+* Deletar conta
+* Gerenciamento de saldo
 
-##  Tecnologias Utilizadas
+## 💸 Transações
 
-- Python 3.13
-- SQLAlchemy (ORM)
-- MySQL
-- PyMySQL
-- Git
+* Registrar entradas
+* Registrar saídas
+* Atualização automática do saldo da conta
+* Buscar transações
+* Excluir transações com reversão automática do saldo
 
 ---
 
-##  Estrutura do Projeto
+# 🏛 Arquitetura
+
+O projeto utiliza uma arquitetura em camadas para manter o código desacoplado e de fácil manutenção.
 
 ```text
-Projeto Financeiro - Alchemy/
+Finance-Core/
 │
-├── run.py                # Arquivo principal para executar o sistema
-├── main.py               # Menus do sistema
-│
-├── configs/
-│   └── base.py          # Declaração de Base
-|   └── connection.py    # Gerenciador de conexão com o banco
+├── core/
+│   ├── base.py
+│   └── connection.py
 │
 ├── models/
-│   ├── users.py         # Model de usuários
-│   ├── contas.py     # Model de contas
-│   └── transacoes.py # Model de transações
+│   ├── users.py
+│   ├── contas.py
+│   └── transacoes.py
 │
-├── services/
+├── repositories/
 │   ├── users_repository.py
 │   ├── contas_repository.py
 │   └── transacao_repository.py
 │
+├── services/
+│   ├── users_service.py
+│   ├── accounts_service.py
+│   └── transaction_service.py
+│
+├── schemas/
+│   └── contas.py
+│
+├── mappers/
+│   └── conta_mapper.py
+│
+├── main.py
+├── run.py
 └── README.md
 ```
 
-## Como Rodar
-- git clone https://github.com/Tutusr32/Finance-Core---Projeto-Financeiro
-  
-  # Instale as dependências
-- pip install sqlalchemy pymysql
-  
-  # Crie o banco de dados
-- CREATE DATABASE finance_core;
-- Crie e coloque sua engine no arquivo connection.py
-  
-  # Execute o run.py
+### Fluxo da aplicação
 
-## Objetivo do projeto
+```text
+Interface (CLI)
+       │
+       ▼
+    Services
+       │
+       ▼
+ Repositories
+       │
+       ▼
+  SQLAlchemy ORM
+       │
+       ▼
+      MySQL
+```
 
-- Projeto criado para:
+### Responsabilidade de cada camada
 
--- Praticar SQLAlchemy na prática
+| Camada           | Responsabilidade                                |
+| ---------------- | ----------------------------------------------- |
+| **core**         | Configuração da aplicação e conexão com o banco |
+| **models**       | Entidades mapeadas pelo SQLAlchemy              |
+| **repositories** | Operações de acesso ao banco de dados           |
+| **services**     | Regras de negócio da aplicação                  |
+| **schemas**      | DTOs utilizados para padronização dos dados     |
+| **mappers**      | Conversão entre Models e Schemas                |
+| **main**         | Interface de interação com o usuário            |
 
--- Trabalhar com CRUD completo
+---
 
--- Entender relacionamento entre tabelas
+# 🛠 Tecnologias Utilizadas
 
--- Simular um sistema financeiro real
+* Python 3.13
+* SQLAlchemy
+* MySQL
+* PyMySQL
+* Git
 
-## Próximos passos
+---
 
-- Validações mais robustas
+# ▶️ Como executar
 
-- Tratamento de erros melhorado
+Clone o repositório
 
-- Logs
+```bash
+git clone https://github.com/Tutusr32/Finance-Core---Projeto-Financeiro
+```
 
-- Interface futura (API ou web)
+Entre na pasta
+
+```bash
+cd Finance-Core---Projeto-Financeiro
+```
+
+Instale as dependências
+
+```bash
+pip install sqlalchemy pymysql
+```
+
+Crie o banco de dados
+
+```sql
+CREATE DATABASE finance_core;
+```
+
+Configure sua conexão no arquivo
+
+```text
+core/connection.py
+```
+
+Execute a aplicação
+
+```bash
+python run.py
+```
+
+---
+
+# 📚 Conceitos aplicados
+
+* Programação Orientada a Objetos (POO)
+* SQLAlchemy ORM
+* CRUD completo
+* Relacionamentos entre tabelas
+* Context Manager para gerenciamento de sessões
+* Arquitetura MVC
+* Repository Pattern
+* Service Layer Pattern
+* Separação de responsabilidades
+* Injeção de dependência
+* Mappers
+* DTOs (Schemas)
+
+---
+
+# 🎯 Objetivo
+
+Este projeto foi desenvolvido para aprofundar conhecimentos em desenvolvimento backend utilizando Python, criando uma aplicação organizada, escalável e preparada para evoluir para uma API REST.
+
+Além da implementação do CRUD, o foco foi aplicar conceitos presentes em aplicações reais, buscando uma arquitetura limpa e de fácil manutenção.
+
+---
+
+# 🔮 Roadmap
+
+* ✅ CRUD completo
+* ✅ Arquitetura MVC
+* ✅ Repository Pattern
+* ✅ Service Layer
+* ✅ Mappers
+* ✅ Schemas (DTOs)
+
+### Próximas evoluções
+
+* API REST com FastAPI
+* Controllers
+* DTOs completos para todas as entidades
+* Pydantic
+* Autenticação JWT
+* Testes automatizados
+* Docker
+* Swagger/OpenAPI
+* Logging
+* Tratamento global de exceções
+
+---
+
+# 👨‍💻 Autor
+
+Desenvolvido por **Arthur Rezende** como projeto de estudos para evolução em desenvolvimento backend com Python, SQLAlchemy e boas práticas de arquitetura de software.
