@@ -4,9 +4,7 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Ambiente virtual
-venv/
-env/
+# Ambiente virtual (Poetry)
 .venv/
 
 # IDE
@@ -28,9 +26,10 @@ env/
 .coverage
 htmlcov/
 
+# Lint/format cache
+.ruff_cache/
+.mypy_cache/
+
 # OS
 .DS_Store
 Thumbs.db
-
-# SQLAlchemy / Alembic (se usar no futuro)
-alembic/versions/*.pyc

@@ -4,15 +4,11 @@ from models.contas import Contas
 
 
 class ContasRepository:
-
     def get_by_id_and_user(self, session, user_id: int, conta_id: int):
         return (
             session.query(Contas)
             .options(joinedload(Contas.user))
-            .filter(
-                Contas.user_id == user_id,
-                Contas.id == conta_id
-            )
+            .filter(Contas.user_id == user_id, Contas.id == conta_id)
             .first()
         )
 
@@ -24,12 +20,8 @@ class ContasRepository:
             .first()
         )
 
-    def create(self, session, user_id: int, nome: str, saldo):
-        conta = Contas(
-            user_id=user_id,
-            nome=nome,
-            saldo=saldo
-        )
+    def create(self, session, user_id: int, name: str, saldo):
+        conta = Contas(user_id=user_id, name=name, saldo=saldo)
 
         session.add(conta)
         session.commit()
@@ -37,14 +29,14 @@ class ContasRepository:
 
         return conta
 
-    def update(self, session, conta_id: int, nome=None, saldo=None):
+    def update(self, session, conta_id: int, name=None, saldo=None):
         conta = self.get_by_id(session, conta_id)
 
         if not conta:
             return None
 
-        if nome is not None:
-            conta.nome = nome
+        if name is not None:
+            conta.name = name
 
         if saldo is not None:
             conta.saldo = saldo
@@ -63,9 +55,9 @@ class ContasRepository:
         data = {
             "id": conta.id,
             "user_id": conta.user_id,
-            "nome_usuario": conta.user.nome,
-            "nome": conta.nome,
-            "saldo": conta.saldo
+            "user_name": conta.user.name,
+            "name": conta.name,
+            "saldo": conta.saldo,
         }
 
         session.delete(conta)

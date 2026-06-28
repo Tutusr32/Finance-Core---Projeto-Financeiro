@@ -1,6 +1,8 @@
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String, Integer, ForeignKey, Numeric, Enum, DateTime, func
+
 from core.base import Base
+
 
 class Transacoes(Base):
     __tablename__ = "transacoes"
@@ -15,4 +17,11 @@ class Transacoes(Base):
     conta = relationship("Contas", back_populates="transacoes")
 
     def __repr__(self):
-        return f"| ID:{self.id} | {self.conta_id} | {self.tipo} | {self.valor} | {self.categoria} | {self.data} |"
+        return (
+            f"| ID:{self.id} | "
+            f"{self.conta_id} | "
+            f"{self.tipo} | "
+            f"{self.valor} | "
+            f"{self.categoria} | "
+            f"{self.data} |"
+        )
