@@ -15,12 +15,7 @@ class UsersRepository:
         return user
 
     def get_by_id(self, user_id: int):
-        return (
-            self.session
-            .query(Users)
-            .filter(Users.id == user_id)
-            .first()
-        )
+        return self.session.query(Users).filter(Users.id == user_id).first()
 
     def update(self, user_id: int, name=None, email=None):
         user = self.get_by_id(user_id)
@@ -50,4 +45,3 @@ class UsersRepository:
         self.session.commit()
 
         return True
-        

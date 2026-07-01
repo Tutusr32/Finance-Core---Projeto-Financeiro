@@ -16,4 +16,8 @@ class ContaResponse(BaseModel):
     saldo: Decimal
 
     model_config = ConfigDict(from_attributes=True)
-    
+
+
+class ContaUpdate(BaseModel):
+    name: str | None = None
+    saldo: Decimal | None = None

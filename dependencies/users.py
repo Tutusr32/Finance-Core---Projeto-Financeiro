@@ -10,7 +10,5 @@ def get_users_repository(db: Session = Depends(get_db)):
     return UsersRepository(db)
 
 
-def get_users_service(
-    repo: UsersRepository = Depends(get_users_repository)
-):
+def get_users_service(repo: UsersRepository = Depends(get_users_repository)):
     return UsersService(repo)

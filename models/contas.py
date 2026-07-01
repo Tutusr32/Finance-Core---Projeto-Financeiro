@@ -16,5 +16,6 @@ class Contas(Base):
     transacoes = relationship("Transacoes", back_populates="conta")
 
     def __repr__(self):
-        return f"<Conta(id={self.id}, user_id={self.user_id}, name='{self.name}', saldo={self.saldo})>"
-    
+        return (
+            f"<Conta(id={self.id}, user_id={self.user_id}, name='{self.name}', saldo={self.saldo})>"
+        )

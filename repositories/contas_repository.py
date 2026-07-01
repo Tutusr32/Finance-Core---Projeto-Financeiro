@@ -1,36 +1,49 @@
 from sqlalchemy.orm import joinedload
-
 from models.contas import Contas
 
 
 class ContasRepository:
-    def get_by_id_and_user(self, session, user_id: int, conta_id: int):
+    def __init__(self, session):
+        self.session = session
+
+    def get_by_id_and_user(self, user_id: int, conta_id: int):
         return (
-            session.query(Contas)
+            self.session.query(Contas)
             .options(joinedload(Contas.user))
             .filter(Contas.user_id == user_id, Contas.id == conta_id)
             .first()
         )
 
-    def get_by_id(self, session, conta_id: int):
+    def get_by_id(self, conta_id: int):
         return (
-            session.query(Contas)
+            self.session.query(Contas)
             .options(joinedload(Contas.user))
             .filter(Contas.id == conta_id)
             .first()
         )
 
-    def create(self, session, user_id: int, name: str, saldo):
+    def create(self, user_id: int, name: str, saldo):
         conta = Contas(user_id=user_id, name=name, saldo=saldo)
-
-        session.add(conta)
-        session.commit()
-        session.refresh(conta)
-
+        self.session.add(conta)
+        self.session.commit()
+        self.session.refresh(conta)
         return conta
 
-    def update(self, session, conta_id: int, name=None, saldo=None):
-        conta = self.get_by_id(session, conta_id)
+    def update(
+        self,
+        user_id: int,
+        conta_id: int,
+        name=None,
+        saldo=None,
+    ):
+        conta = (
+            self.session.query(Contas)
+            .filter(
+                Contas.id == conta_id,
+                Contas.user_id == user_id,
+            )
+            .first()
+        )
 
         if not conta:
             return None
@@ -41,27 +54,25 @@ class ContasRepository:
         if saldo is not None:
             conta.saldo = saldo
 
-        session.commit()
-        session.refresh(conta)
+        self.session.commit()
+        self.session.refresh(conta)
 
         return conta
 
-    def delete(self, session, conta_id: int):
-        conta = self.get_by_id(session, conta_id)
+    def delete(self, user_id: int, conta_id: int,):
+        conta = (
+            self.session.query(Contas)
+            .filter(
+                Contas.id == conta_id,
+                Contas.user_id == user_id,
+            )
+            .first()
+        )
 
         if not conta:
             return None
 
-        data = {
-            "id": conta.id,
-            "user_id": conta.user_id,
-            "user_name": conta.user.name,
-            "name": conta.name,
-            "saldo": conta.saldo,
-        }
+        self.session.delete(conta)
+        self.session.commit()
 
-        session.delete(conta)
-        session.commit()
-
-        return data
-    
+        return True
