@@ -6,6 +6,8 @@ O projeto foi criado para consolidar conceitos de desenvolvimento backend, aplic
 
 ---
 
+Alteração -- 01/07/2026
+
 # 🚀 Funcionalidades
 
 ## 👤 Usuários
