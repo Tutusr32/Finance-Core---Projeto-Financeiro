@@ -1,15 +1,12 @@
 from models.users import Users
 
+
 class UsersRepository:
     def __init__(self, session):
         self.session = session
 
     def create(self, name: str, email: str, password: str):
-        user = Users(
-            name=name, 
-            email=email,
-            password=password
-            )
+        user = Users(name=name, email=email, password=password)
 
         self.session.add(user)
         self.session.commit()

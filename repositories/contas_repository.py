@@ -59,7 +59,11 @@ class ContasRepository:
 
         return conta
 
-    def delete(self, user_id: int, conta_id: int,):
+    def delete(
+        self,
+        user_id: int,
+        conta_id: int,
+    ):
         conta = (
             self.session.query(Contas)
             .filter(

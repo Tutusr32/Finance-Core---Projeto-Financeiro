@@ -1,64 +1,43 @@
-from models.transacoes import Transacoes
+from fastapi import HTTPException
+
+from mappers.transaction_mapper import transacao_to_dict
 
 
-class TransactionService:
+class TransacoesService:
+    def __init__(self, repo, contas_repo):
+        self.repo = repo
+        self.contas_repo = contas_repo
 
-    def __init__(
-        self,
-        transaction_repository,
-        account_repository
-    ):
-        self.transaction_repository = transaction_repository
-        self.account_repository = account_repository
-
-    def create_transaction(self, session, conta_id, valor, tipo, categoria):
-
-        conta = self.repository.get_account_by_id(session, conta_id)
+    def criar_transacao(self, user_id: int, conta_id: int, tipo: str, valor, categoria: str = "geral"):
+        conta = self.contas_repo.get_by_id(conta_id)
 
         if not conta:
-            return None, "Conta não encontrada."
+            raise HTTPException(status_code=404, detail="Conta não encontrada.")
+
+        if conta.user_id != user_id:
+            raise HTTPException(status_code=404, detail="Conta não encontrada para este usuário.")
 
         if valor <= 0:
-            return None, "Valor inválido."
+            raise HTTPException(status_code=400, detail="Valor inválido.")
 
-        if tipo == "E":
-            conta.saldo += valor
-            tipo = "entrada"
-
-        elif tipo == "S":
+        if tipo == "saida":
             if conta.saldo < valor:
-                return None, "Saldo insuficiente."
-
+                raise HTTPException(status_code=400, detail="Saldo insuficiente.")
             conta.saldo -= valor
-            tipo = "saida"
+
+        elif tipo == "entrada":
+            conta.saldo += valor
 
         else:
-            return None, "Tipo inválido."
+            raise HTTPException(status_code=400, detail="Tipo inválido (use entrada ou saída).")
 
-        transacao = Transacoes(conta_id=conta_id, valor=valor, tipo=tipo, categoria=categoria)
+        self.contas_repo.update(user_id=conta.user_id, conta_id=conta.id, saldo=conta.saldo)
 
-        transacao = self.repository.create_transaction(session, transacao)
+        transacao = self.repo.create(conta_id, tipo, valor, categoria)
 
-        return transacao, "Transação registrada com sucesso."
+        return transacao_to_dict(transacao)
 
-    def get_transaction(self, session, transacao_id):
-        return self.repository.get_transaction_by_id(session, transacao_id)
+    def listar_transacoes(self, conta_id: int):
+        transacoes = self.repo.get_by_conta(conta_id)
 
-    def delete_transaction(self, session, transacao_id):
-
-        transacao = self.repository.get_transaction_by_id(session, transacao_id)
-
-        if not transacao:
-            return False, "Transação não encontrada."
-
-        conta = self.repository.get_account_by_id(session, transacao.conta_id)
-
-        if transacao.tipo == "entrada":
-            conta.saldo -= transacao.valor
-
-        elif transacao.tipo == "saida":
-            conta.saldo += transacao.valor
-
-        self.repository.delete_transaction(session, transacao)
-
-        return True, "Transação excluída e saldo ajustado."
+        return [transacao_to_dict(t) for t in transacoes]
