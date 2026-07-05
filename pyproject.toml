@@ -15,7 +15,8 @@ dependencies = [
     "python-dotenv (>=1.2.2,<2.0.0)",
     "pydantic-settings (>=2.14.2,<3.0.0)",
     "fastapi (>=0.138.1,<0.139.0)",
-    "email-validator (>=2.3.0,<3.0.0)"
+    "email-validator (>=2.3.0,<3.0.0)",
+    "pwdlib[argon2] (>=0.3.0,<0.4.0)"
 ]
 
 

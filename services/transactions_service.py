@@ -2,8 +2,14 @@ from models.transacoes import Transacoes
 
 
 class TransactionService:
-    def __init__(self, repository):
-        self.repository = repository
+
+    def __init__(
+        self,
+        transaction_repository,
+        account_repository
+    ):
+        self.transaction_repository = transaction_repository
+        self.account_repository = account_repository
 
     def create_transaction(self, session, conta_id, valor, tipo, categoria):
 
