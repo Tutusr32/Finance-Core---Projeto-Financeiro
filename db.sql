@@ -5,7 +5,9 @@ USE finance_core;
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL
+
 );
 
 CREATE TABLE contas (
