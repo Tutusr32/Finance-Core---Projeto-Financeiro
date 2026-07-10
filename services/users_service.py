@@ -1,19 +1,46 @@
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 
 from repositories.users_repository import UsersRepository
+from schemas.user_schema import UserCreate, UserUpdate
 
-from core.security import hash_password
+from core.security import hash_password, verify_password
 
 
 class UsersService:
     def __init__(self, repo: UsersRepository):
         self.repo = repo
 
-    def criar_usuario(self, user):
+    def criar_usuario(self, user: UserCreate):
+        try:
+            return self.repo.create(
+                name=user.name,
+                email=user.email,
+                password=hash_password(user.password),
+            )
+        except IntegrityError:
+            self.repo.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email já cadastrado.",
+            )
 
-        return self.repo.create(
-            name=user.name, email=user.email, password=hash_password(user.password)
-        )
+    def autenticar_usuario(self, email: str, password: str):
+        user = self.repo.get_by_email(email)
+
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Credenciais inválidas.",
+            )
+
+        if not verify_password(password, user.password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Credenciais inválidas.",
+            )
+
+        return user
 
     def buscar_usuario(self, user_id):
         user = self.repo.get_by_id(user_id)
@@ -25,9 +52,24 @@ class UsersService:
 
         return user
 
-    def atualizar_usuario(self, user_id: int, name=None, email=None):
+    def atualizar_usuario(self, user_id: int, user_update: UserUpdate):
+        password = None
+        if user_update.password is not None:
+            password = hash_password(user_update.password)
 
-        user = self.repo.update(user_id, name, email)
+        try:
+            user = self.repo.update(
+                user_id,
+                name=user_update.name,
+                email=user_update.email,
+                password=password,
+            )
+        except IntegrityError:
+            self.repo.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email já cadastrado.",
+            )
 
         if user is None:
             raise HTTPException(

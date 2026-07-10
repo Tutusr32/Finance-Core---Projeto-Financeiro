@@ -16,7 +16,9 @@ dependencies = [
     "pydantic-settings (>=2.14.2,<3.0.0)",
     "fastapi (>=0.138.1,<0.139.0)",
     "email-validator (>=2.3.0,<3.0.0)",
-    "pwdlib[argon2] (>=0.3.0,<0.4.0)"
+    "pwdlib[argon2] (>=0.3.0,<0.4.0)",
+    "pyjwt (>=2.10.0,<3.0.0)",
+    "python-multipart (>=0.0.32,<0.0.33)"
 ]
 
 
@@ -52,7 +54,7 @@ addopts = "-p no:warnings"
 lint = "ruff check ."
 fix = "ruff check . --fix"
 format = "ruff format ."
-run = "uvicorn main:app --reload"
+run = "uvicorn app.main:app --reload"
 pre_test = "task lint"
 test = "pytest -s -x --cov=app -vv"
 post_test = "coverage html"

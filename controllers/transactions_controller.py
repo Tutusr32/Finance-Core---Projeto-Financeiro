@@ -1,23 +1,24 @@
 from fastapi import APIRouter, Depends, status
 
+from dependencies.auth import get_current_user
 from dependencies.transaction import get_transactions_service
 from schemas.transaction_schema import TransactionCreate, TransactionResponse
 from services.transactions_service import TransacoesService
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
- 
 
-@router.post("", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
+
+@router.post("/{conta_id}", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
 def create_transaction(
+    conta_id: int,
     transaction: TransactionCreate,
     service: TransacoesService = Depends(get_transactions_service),
+    current_user=Depends(get_current_user),
 ):
     return service.criar_transacao(
-        user_id=transaction.user_id,
-        conta_id=transaction.conta_id,
-        tipo=transaction.type,
-        valor=transaction.amount,
-        categoria=transaction.category,
+        user_id=current_user.id,
+        conta_id=conta_id,
+        transaction=transaction,
     )
 
 
@@ -25,5 +26,6 @@ def create_transaction(
 def list_transactions(
     conta_id: int = ...,
     service: TransacoesService = Depends(get_transactions_service),
+    current_user=Depends(get_current_user),
 ):
-    return service.listar_transacoes(conta_id=conta_id)
+    return service.listar_transacoes(user_id=current_user.id, conta_id=conta_id)

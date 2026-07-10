@@ -17,7 +17,10 @@ class UsersRepository:
     def get_by_id(self, user_id: int):
         return self.session.query(Users).filter(Users.id == user_id).first()
 
-    def update(self, user_id: int, name=None, email=None):
+    def get_by_email(self, email: str):
+        return self.session.query(Users).filter(Users.email == email).first()
+
+    def update(self, user_id: int, name=None, email=None, password=None):
         user = self.get_by_id(user_id)
 
         if not user:
@@ -28,6 +31,9 @@ class UsersRepository:
 
         if email is not None:
             user.email = email
+
+        if password is not None:
+            user.password = password
 
         self.session.commit()
         self.session.refresh(user)

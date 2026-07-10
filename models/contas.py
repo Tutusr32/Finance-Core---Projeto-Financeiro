@@ -13,7 +13,11 @@ class Contas(Base):
     saldo = Column(Numeric(10, 2), nullable=False)
 
     user = relationship("Users", back_populates="contas")
-    transacoes = relationship("Transacoes", back_populates="conta")
+    transacoes = relationship(
+        "Transacoes",
+        back_populates="conta",
+        cascade="all, delete-orphan",
+    )
 
     def __repr__(self):
         return (

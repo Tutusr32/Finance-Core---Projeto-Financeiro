@@ -35,6 +35,7 @@ class ContasRepository:
         conta_id: int,
         name=None,
         saldo=None,
+        commit: bool = True,
     ):
         conta = (
             self.session.query(Contas)
@@ -54,8 +55,9 @@ class ContasRepository:
         if saldo is not None:
             conta.saldo = saldo
 
-        self.session.commit()
-        self.session.refresh(conta)
+        if commit:
+            self.session.commit()
+            self.session.refresh(conta)
 
         return conta
 

@@ -1,8 +1,9 @@
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-engine = create_engine("mysql+pymysql://root:Mcwm%406306Sql@localhost:3306/finance_core")
+from core.settings import settings
 
+engine = create_engine(settings.DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

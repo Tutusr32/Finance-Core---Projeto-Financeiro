@@ -1,12 +1,11 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ContaCreate(BaseModel):
-    name: str
-    saldo: Decimal
-    user_id: int
+    name: str = Field(..., min_length=1)
+    saldo: Decimal = Field(default=0)
 
 
 class ContaResponse(BaseModel):
