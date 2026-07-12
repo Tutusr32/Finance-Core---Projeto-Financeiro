@@ -144,8 +144,8 @@ Authorization: Bearer <token>
 | ------ | ------------------------ | ----------------------------------------------- |
 | POST   | `/accounts`              | Cria uma conta vinculada ao usuário autenticado |
 | GET    | `/accounts/{conta_id}`   | Consulta uma conta do usuário autenticado       |
-| PATCH  | `/accounts/{account_id}` | Atualiza uma conta do usuário autenticado       |
-| DELETE | `/accounts/{account_id}` | Remove uma conta do usuário autenticado         |
+| PATCH  | `/accounts/{conta_id}` | Atualiza uma conta do usuário autenticado       |
+| DELETE | `/accounts/{conta_id}` | Remove uma conta do usuário autenticado         |
 
 ### Transações
 
