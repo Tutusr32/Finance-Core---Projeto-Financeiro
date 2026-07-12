@@ -27,33 +27,33 @@ def get_account(
 
 
 @router.patch(
-    "/{account_id}",
+    "/{conta_id}",
     response_model=ContaResponse,
     status_code=status.HTTP_200_OK,
 )
 def update_account(
-    account_id: int,
+    conta_id: int,
     account: ContaUpdate,
     service: ContaService = Depends(get_accounts_service),
     current_user=Depends(get_current_user),
 ):
     return service.atualizar_conta(
         user_id=current_user.id,
-        conta_id=account_id,
+        conta_id=conta_id,
         account=account,
     )
 
 
 @router.delete(
-    "/{account_id}",
+    "/{conta_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_account(
-    account_id: int,
+    conta_id: int,
     service: ContaService = Depends(get_accounts_service),
     current_user=Depends(get_current_user),
 ):
     service.deletar_conta(
         user_id=current_user.id,
-        conta_id=account_id,
+        conta_id=conta_id,
     )

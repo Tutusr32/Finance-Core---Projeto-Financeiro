@@ -32,17 +32,14 @@ class TransacoesService:
         else:
             raise HTTPException(status_code=400, detail="Tipo inválido (use entrada ou saída).")
 
-        try:
-            self.contas_repo.update(
-                user_id=conta.user_id, conta_id=conta.id, saldo=conta.saldo
+
+        self.contas_repo.update(
+            user_id=conta.user_id, conta_id=conta.id, saldo=conta.saldo
             )
 
-            transacao = self.repo.create(
-                conta_id, transaction.type, transaction.amount, transaction.category
+        transacao = self.repo.create(
+            conta_id, transaction.type, transaction.amount, transaction.category
             )
-
-        except Exception as exc:
-            raise exc
 
         return transacao_to_dict(transacao)
 
