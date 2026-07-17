@@ -18,29 +18,23 @@ class TransacoesService:
         if conta.user_id != user_id:
             raise HTTPException(status_code=403, detail="Acesso negado.")
 
-        if transaction.amount <= 0:
-            raise HTTPException(status_code=400, detail="Valor inválido.")
-
         if transaction.type == "saida":
             if conta.saldo < transaction.amount:
                 raise HTTPException(status_code=400, detail="Saldo insuficiente.")
+
             conta.saldo -= transaction.amount
 
-        elif transaction.type == "entrada":
+        if transaction.type == "entrada":
             conta.saldo += transaction.amount
-
-        else:
-            raise HTTPException(status_code=400, detail="Tipo inválido (use entrada ou saída).")
-
 
         self.contas_repo.update(
             user_id=conta.user_id, conta_id=conta.id, saldo=conta.saldo, commit=False
-            )
+        )
 
         transacao = self.repo.create(
             conta_id, transaction.type, transaction.amount, transaction.category, commit=False
-            )
-        
+        )
+
         try:
             self.repo.session.commit()
 
