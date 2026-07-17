@@ -34,12 +34,21 @@ class TransacoesService:
 
 
         self.contas_repo.update(
-            user_id=conta.user_id, conta_id=conta.id, saldo=conta.saldo
+            user_id=conta.user_id, conta_id=conta.id, saldo=conta.saldo, commit=False
             )
 
         transacao = self.repo.create(
-            conta_id, transaction.type, transaction.amount, transaction.category
+            conta_id, transaction.type, transaction.amount, transaction.category, commit=False
             )
+        
+        try:
+            self.repo.session.commit()
+
+        except Exception:
+            self.repo.session.rollback()
+            raise
+
+        self.repo.session.refresh(transacao)
 
         return transacao_to_dict(transacao)
 
