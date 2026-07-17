@@ -3,7 +3,7 @@ def transacao_to_dict(transacao):
         "id": transacao.id,
         "conta_id": transacao.conta_id,
         "type": transacao.tipo,
-        "amount": float(transacao.valor),
+        "amount": transacao.valor,
         "category": transacao.categoria,
         "data": transacao.data.isoformat() if transacao.data else None,
     }
