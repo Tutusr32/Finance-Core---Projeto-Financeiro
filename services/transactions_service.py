@@ -49,10 +49,18 @@ class TransacoesService:
     def listar_transacoes(self, user_id: int, conta_id: int):
         conta = self.contas_repo.get_by_id(conta_id)
 
-        if not conta or conta.user_id != user_id:
+        conta = self.contas_repo.get_by_id(conta_id)
+
+        if not conta:
             raise HTTPException(
                 status_code=404,
-                detail="Conta não encontrada para este usuário.",
+                detail="Conta não encontrada.",
+            )
+
+        if conta.user_id != user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="Acesso negado.",
             )
 
         transacoes = self.repo.get_by_conta(conta_id)
