@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
-from controllers.auth_controller import router as auth_router
-from controllers.users_controller import router as users_router
 from controllers.accounts_controller import router as accounts_router
+from controllers.auth_controller import router as auth_router
 from controllers.transactions_controller import router as transactions_router
+from controllers.users_controller import router as users_router
 
 app = FastAPI(title="Finance Core")
 

@@ -9,7 +9,7 @@ class Users(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column("nome", String(100), nullable=False)
-    email = Column(String(100), nullable=False)
+    email = Column(String(100), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
 
     contas = relationship(

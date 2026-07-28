@@ -1,0 +1,217 @@
+from http import HTTPStatus
+
+
+def test_create_account(client, token):
+    response = client.post(
+        "/accounts",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "Carteira",
+            "saldo": 100,
+        },
+    )
+
+    assert response.status_code == HTTPStatus.CREATED
+
+    data = response.json()
+
+    assert data["name"] == "Carteira"
+    assert data["saldo"] == "100.00"
+
+
+def test_create_account_negative_balance(client, token):
+    response = client.post(
+        "/accounts",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "Carteira",
+            "saldo": -10,
+        },
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {"detail": "Saldo inicial não pode ser negativo."}
+
+
+def test_create_account_without_token(client):
+    response = client.post(
+        "/accounts",
+        json={
+            "name": "Carteira",
+            "saldo": 100,
+        },
+    )
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_get_account(client, account, token):
+    response = client.get(
+        f"/accounts/{account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+    assert response.json()["id"] == account.id
+
+
+def test_get_account_not_found(client, token):
+    response = client.get(
+        "/accounts/999",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {"detail": "Conta não encontrada."}
+
+
+def test_get_account_other_user(client, other_user, other_account, token):
+    response = client.get(
+        f"/accounts/{other_account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {"detail": "Acesso negado."}
+
+
+def test_get_account_without_token(client, account):
+    response = client.get(f"/accounts/{account.id}")
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_update_account_name(client, account, token):
+    response = client.patch(
+        f"/accounts/{account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "Banco Inter",
+        },
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()["name"] == "Banco Inter"
+
+
+def test_update_account_balance(client, account, token):
+    response = client.patch(
+        f"/accounts/{account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "saldo": 500,
+        },
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()["saldo"] == "500.00"
+
+
+def test_update_account_multiple_fields(client, account, token):
+    response = client.patch(
+        f"/accounts/{account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "Nubank",
+            "saldo": 350,
+        },
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+    data = response.json()
+
+    assert data["name"] == "Nubank"
+    assert data["saldo"] == "350.00"
+
+
+def test_update_account_negative_balance(client, account, token):
+    response = client.patch(
+        f"/accounts/{account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "saldo": -100,
+        },
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {"detail": "Saldo não pode ser negativo."}
+
+
+def test_update_account_not_found(client, token):
+    response = client.patch(
+        "/accounts/999",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "Teste",
+        },
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_update_account_other_user(client, other_account, token):
+    response = client.patch(
+        f"/accounts/{other_account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "Teste",
+        },
+    )
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_update_account_empty_body(client, account, token):
+    response = client.patch(
+        f"/accounts/{account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_update_account_without_token(client, account):
+    response = client.patch(
+        f"/accounts/{account.id}",
+        json={
+            "name": "Novo Nome",
+        },
+    )
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_delete_account(client, account, token):
+    response = client.delete(
+        f"/accounts/{account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.NO_CONTENT
+
+
+def test_delete_account_not_found(client, token):
+    response = client.delete(
+        "/accounts/999",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_delete_account_other_user(client, other_account, token):
+    response = client.delete(
+        f"/accounts/{other_account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_delete_account_without_token(client, account):
+    response = client.delete(f"/accounts/{account.id}")
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
