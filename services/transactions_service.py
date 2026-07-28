@@ -18,38 +18,49 @@ class TransacoesService:
         if conta.user_id != user_id:
             raise HTTPException(status_code=403, detail="Acesso negado.")
 
-        if transaction.amount <= 0:
-            raise HTTPException(status_code=400, detail="Valor inválido.")
-
         if transaction.type == "saida":
             if conta.saldo < transaction.amount:
                 raise HTTPException(status_code=400, detail="Saldo insuficiente.")
+
             conta.saldo -= transaction.amount
 
-        elif transaction.type == "entrada":
+        if transaction.type == "entrada":
             conta.saldo += transaction.amount
 
-        else:
-            raise HTTPException(status_code=400, detail="Tipo inválido (use entrada ou saída).")
-
-
         self.contas_repo.update(
-            user_id=conta.user_id, conta_id=conta.id, saldo=conta.saldo
-            )
+            user_id=conta.user_id, conta_id=conta.id, saldo=conta.saldo, commit=False
+        )
 
         transacao = self.repo.create(
-            conta_id, transaction.type, transaction.amount, transaction.category
-            )
+            conta_id, transaction.type, transaction.amount, transaction.category, commit=False
+        )
+
+        try:
+            self.repo.session.commit()
+
+        except Exception:
+            self.repo.session.rollback()
+            raise
+
+        self.repo.session.refresh(transacao)
 
         return transacao_to_dict(transacao)
 
     def listar_transacoes(self, user_id: int, conta_id: int):
         conta = self.contas_repo.get_by_id(conta_id)
 
-        if not conta or conta.user_id != user_id:
+        conta = self.contas_repo.get_by_id(conta_id)
+
+        if not conta:
             raise HTTPException(
                 status_code=404,
-                detail="Conta não encontrada para este usuário.",
+                detail="Conta não encontrada.",
+            )
+
+        if conta.user_id != user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="Acesso negado.",
             )
 
         transacoes = self.repo.get_by_conta(conta_id)

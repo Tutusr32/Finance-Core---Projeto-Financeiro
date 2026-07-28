@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+
 from mappers.conta_mapper import conta_to_dict
 from repositories.contas_repository import ContasRepository
 from schemas.conta_schema import ContaCreate, ContaUpdate
@@ -9,7 +10,7 @@ class ContaService:
         self.repo = repo
 
     def buscar_conta(self, user_id: int, conta_id: int):
-        conta = self.repo.get_by_id_and_user(user_id, conta_id)
+        conta = self.repo.get_by_id(conta_id)
 
         if not conta:
             raise HTTPException(status_code=404, detail="Conta não encontrada.")
@@ -27,6 +28,20 @@ class ContaService:
         return conta_to_dict(conta)
 
     def atualizar_conta(self, user_id: int, conta_id: int, account: ContaUpdate):
+        conta = self.repo.get_by_id(conta_id)
+
+        if not conta:
+            raise HTTPException(
+                status_code=404,
+                detail="Conta não encontrada.",
+            )
+
+        if conta.user_id != user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="Acesso negado.",
+            )
+
         if account.saldo is not None and account.saldo < 0:
             raise HTTPException(status_code=400, detail="Saldo não pode ser negativo.")
 
@@ -37,12 +52,23 @@ class ContaService:
             saldo=account.saldo,
         )
 
-        if not conta:
-            raise HTTPException(status_code=404, detail="Conta não encontrada.")
-
         return conta_to_dict(conta)
 
     def deletar_conta(self, user_id: int, conta_id: int):
+        conta = self.repo.get_by_id(conta_id)
+
+        if not conta:
+            raise HTTPException(
+                status_code=404,
+                detail="Conta não encontrada.",
+            )
+
+        if conta.user_id != user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="Acesso negado.",
+            )
+
         deleted = self.repo.delete(
             user_id=user_id,
             conta_id=conta_id,
