@@ -1,16 +1,13 @@
-CREATE DATABASE finance_core;
-
 USE finance_core;
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL
-
 );
 
-CREATE TABLE contas (
+CREATE TABLE IF NOT EXISTS contas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     nome VARCHAR(50) NOT NULL,
@@ -18,7 +15,7 @@ CREATE TABLE contas (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE transacoes (
+CREATE TABLE IF NOT EXISTS transacoes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     conta_id INT NOT NULL,
     tipo ENUM('entrada', 'saida') NOT NULL,
