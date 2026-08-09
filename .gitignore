@@ -16,6 +16,11 @@ __pycache__/
 
 # Variáveis de ambiente
 .env
+.env.docker
+
+# docker
+.dockerignore
+docker-compose.yml
 
 # Banco local / arquivos temporários
 *.sqlite3
