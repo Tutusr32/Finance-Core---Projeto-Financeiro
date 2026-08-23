@@ -17,6 +17,8 @@ def test_create_account(client, token):
 
     assert data["name"] == "Carteira"
     assert data["saldo"] == "100.00"
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
 
 def test_create_account_negative_balance(client, token):
@@ -53,7 +55,11 @@ def test_get_account(client, account, token):
 
     assert response.status_code == HTTPStatus.OK
 
-    assert response.json()["id"] == account.id
+    data = response.json()
+
+    assert data["id"] == account.id
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
 
 def test_get_account_not_found(client, token):
@@ -92,7 +98,12 @@ def test_update_account_name(client, account, token):
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json()["name"] == "Banco Inter"
+
+    data = response.json()
+
+    assert data["name"] == "Banco Inter"
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
 
 def test_update_account_balance(client, account, token):
@@ -105,7 +116,12 @@ def test_update_account_balance(client, account, token):
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json()["saldo"] == "500.00"
+
+    data = response.json()
+
+    assert data["saldo"] == "500.00"
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
 
 def test_update_account_multiple_fields(client, account, token):
@@ -124,6 +140,32 @@ def test_update_account_multiple_fields(client, account, token):
 
     assert data["name"] == "Nubank"
     assert data["saldo"] == "350.00"
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
+
+
+def test_update_account_updates_updated_at(client, account, token):
+    response = client.get(
+        f"/accounts/{account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+    before = response.json()
+
+    response = client.patch(
+        f"/accounts/{account.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"name": "Conta Atualizada"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+    after = response.json()
+
+    assert after["created_at"] == before["created_at"]
+    assert after["updated_at"] != before["updated_at"]
 
 
 def test_update_account_negative_balance(client, account, token):
@@ -171,6 +213,11 @@ def test_update_account_empty_body(client, account, token):
     )
 
     assert response.status_code == HTTPStatus.OK
+
+    data = response.json()
+
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
 
 def test_update_account_without_token(client, account):

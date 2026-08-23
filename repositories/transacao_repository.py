@@ -21,10 +21,12 @@ class TransacaoRepository:
 
         return transacao
 
-    def get_by_conta(self, conta_id: int):
+    def get_by_conta(self, conta_id: int, limit: int, offset: int):
         return (
             self.session.query(Transacoes)
             .filter(Transacoes.conta_id == conta_id)
             .order_by(Transacoes.id.desc())
+            .offset(offset)
+            .limit(limit)
             .all()
         )

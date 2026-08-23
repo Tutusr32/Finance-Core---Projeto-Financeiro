@@ -14,11 +14,14 @@ def test_create_user(client):
     )
 
     assert response.status_code == HTTPStatus.CREATED
-    assert response.json() == {
-        "id": 1,
-        "name": "alice",
-        "email": "alice@example.com",
-    }
+
+    data = response.json()
+
+    assert data["id"] == 1
+    assert data["name"] == "alice"
+    assert data["email"] == "alice@example.com"
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
 
 def test_create_user_missing_name(client):
@@ -98,7 +101,10 @@ def test_create_user_email_already_exists(client, user):
 
 
 def test_read_user_me(client, user, token):
-    response = client.get("/users/me", headers={"Authorization": f"Bearer {token}"})
+    response = client.get(
+        "/users/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
 
     assert response.status_code == HTTPStatus.OK
 
@@ -107,6 +113,8 @@ def test_read_user_me(client, user, token):
     assert data["id"] == user.id
     assert data["email"] == user.email
     assert data["name"] == user.name
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
 
 def test_read_user_me_without_token(client):
@@ -124,11 +132,13 @@ def test_update_name(client, user, token):
 
     assert response.status_code == HTTPStatus.OK
 
-    assert response.json() == {
-        "id": user.id,
-        "name": "novo_nome",
-        "email": user.email,
-    }
+    data = response.json()
+
+    assert data["id"] == user.id
+    assert data["name"] == "novo_nome"
+    assert data["email"] == user.email
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
 
 def test_update_email(client, user, token):
@@ -140,11 +150,13 @@ def test_update_email(client, user, token):
 
     assert response.status_code == HTTPStatus.OK
 
-    assert response.json() == {
-        "id": user.id,
-        "name": user.name,
-        "email": "novo_email@example.com",
-    }
+    data = response.json()
+
+    assert data["id"] == user.id
+    assert data["name"] == user.name
+    assert data["email"] == "novo_email@example.com"
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
 
 def test_update_multiple_fields(client, user, token):
@@ -159,11 +171,37 @@ def test_update_multiple_fields(client, user, token):
 
     assert response.status_code == HTTPStatus.OK
 
-    assert response.json() == {
-        "id": user.id,
-        "name": "Arthur",
-        "email": "arthur@email.com",
-    }
+    data = response.json()
+
+    assert data["id"] == user.id
+    assert data["name"] == "Arthur"
+    assert data["email"] == "arthur@email.com"
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
+
+
+def test_update_user_updates_updated_at(client, user, token):
+    response = client.get(
+        "/users/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+    before = response.json()
+
+    response = client.patch(
+        "/users/me",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"name": "nome_atualizado"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+    after = response.json()
+
+    assert after["created_at"] == before["created_at"]
+    assert after["updated_at"] != before["updated_at"]
 
 
 def test_update_password(client, user, token):
@@ -174,7 +212,6 @@ def test_update_password(client, user, token):
     )
 
     assert response.status_code == HTTPStatus.OK
-
     assert verify_password("newpassword", user.password)
 
 
@@ -198,7 +235,12 @@ def test_update_short_password(client, token):
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
-def test_update_user_email_already_exists(client, user, other_user, token):
+def test_update_user_email_already_exists(
+    client,
+    user,
+    other_user,
+    token,
+):
     response = client.patch(
         "/users/me",
         headers={"Authorization": f"Bearer {token}"},
@@ -218,11 +260,13 @@ def test_update_empty_body(client, user, token):
 
     assert response.status_code == HTTPStatus.OK
 
-    assert response.json() == {
-        "id": user.id,
-        "name": user.name,
-        "email": user.email,
-    }
+    data = response.json()
+
+    assert data["id"] == user.id
+    assert data["name"] == user.name
+    assert data["email"] == user.email
+    assert data["created_at"] is not None
+    assert data["updated_at"] is not None
 
 
 def test_update_user_without_token(client):
