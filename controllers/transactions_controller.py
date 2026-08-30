@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Query, status
+from http import HTTPStatus
+
+from fastapi import APIRouter, Depends, Query
 
 from dependencies.auth import get_current_user
 from dependencies.transaction import get_transactions_service
@@ -11,7 +13,7 @@ router = APIRouter(prefix="/accounts", tags=["Transactions"])
 @router.post(
     "/{conta_id}/transactions",
     response_model=TransactionResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=HTTPStatus.CREATED,
 )
 def create_transaction(
     conta_id: int,

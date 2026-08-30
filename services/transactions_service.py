@@ -46,9 +46,7 @@ class TransacoesService:
 
         return transacao_to_dict(transacao)
 
-    def listar_transacoes(self, user_id: int, conta_id: int):
-        conta = self.contas_repo.get_by_id(conta_id)
-
+    def listar_transacoes(self, user_id: int, conta_id: int, limit: int, offset: int):
         conta = self.contas_repo.get_by_id(conta_id)
 
         if not conta:
@@ -63,6 +61,6 @@ class TransacoesService:
                 detail="Acesso negado.",
             )
 
-        transacoes = self.repo.get_by_conta(conta_id)
+        transacoes = self.repo.get_by_conta(conta_id=conta_id, limit=limit, offset=offset)
 
         return [transacao_to_dict(t) for t in transacoes]

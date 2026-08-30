@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, status
+from http import HTTPStatus
+
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from core.security import create_access_token
@@ -9,7 +11,7 @@ from services.users_service import UsersService
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@router.post("/login", response_model=TokenResponse, status_code=status.HTTP_200_OK)
+@router.post("/login", response_model=TokenResponse, status_code=HTTPStatus.OK)
 def login_user(
     form_data: OAuth2PasswordRequestForm = Depends(),
     service: UsersService = Depends(get_users_service),
