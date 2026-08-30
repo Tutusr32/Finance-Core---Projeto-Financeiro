@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, status
+from http import HTTPStatus
+
+from fastapi import APIRouter, Depends
 
 from dependencies.accounts import get_accounts_service
 from dependencies.auth import get_current_user
@@ -8,7 +10,7 @@ from services.accounts_service import ContaService
 router = APIRouter(prefix="/accounts", tags=["Accounts"])
 
 
-@router.post("", response_model=ContaResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ContaResponse, status_code=HTTPStatus.CREATED)
 def create_account(
     account: ContaCreate,
     service: ContaService = Depends(get_accounts_service),
@@ -29,7 +31,7 @@ def get_account(
 @router.patch(
     "/{conta_id}",
     response_model=ContaResponse,
-    status_code=status.HTTP_200_OK,
+    status_code=HTTPStatus.OK,
 )
 def update_account(
     conta_id: int,
@@ -46,7 +48,7 @@ def update_account(
 
 @router.delete(
     "/{conta_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=HTTPStatus.NO_CONTENT,
 )
 def delete_account(
     conta_id: int,
