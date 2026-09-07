@@ -42,14 +42,10 @@ class ContaService:
                 detail="Acesso negado.",
             )
 
-        if account.saldo is not None and account.saldo < 0:
-            raise HTTPException(status_code=400, detail="Saldo não pode ser negativo.")
-
         conta = self.repo.update(
             user_id=user_id,
             conta_id=conta_id,
             name=account.name,
-            saldo=account.saldo,
         )
 
         return conta_to_dict(conta)
