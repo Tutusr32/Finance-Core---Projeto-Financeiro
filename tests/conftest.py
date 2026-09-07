@@ -143,3 +143,28 @@ def transaction(db_session, account):
     db_session.commit()
     db_session.refresh(transacao)
     return transacao
+
+@pytest.fixture
+def create_transaction(db_session):
+    def _create_transaction(
+        account,
+        transaction_type,
+        amount,
+        category,
+        transaction_date,
+    ):
+        transaction = Transacoes(
+            conta_id=account.id,
+            tipo=transaction_type,
+            valor=Decimal(str(amount)),
+            categoria=category,
+            data=transaction_date,
+        )
+
+        db_session.add(transaction)
+        db_session.commit()
+        db_session.refresh(transaction)
+
+        return transaction
+
+    return _create_transaction
