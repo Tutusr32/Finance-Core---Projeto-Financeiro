@@ -2,7 +2,12 @@ from datetime import date
 from http import HTTPStatus
 
 
-def test_dashboard_summary(client, account, create_transaction, token):
+def test_dashboard_summary(
+    client,
+    account,
+    create_transaction,
+    token,
+):
     create_transaction(
         account,
         "entrada",
@@ -10,7 +15,6 @@ def test_dashboard_summary(client, account, create_transaction, token):
         "Salário",
         date(2026, 8, 22),
     )
-
     create_transaction(
         account,
         "saida",
@@ -20,7 +24,7 @@ def test_dashboard_summary(client, account, create_transaction, token):
     )
 
     response = client.get(
-        "/dashboard/summary",
+        "/dashboard/summary?start_date=2026-08-20&end_date=2026-08-23",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -28,7 +32,7 @@ def test_dashboard_summary(client, account, create_transaction, token):
 
     data = response.json()
 
-    assert data["saldo_total"] == "1000.00"
+    assert data["saldo_total"] == "2500.00"
     assert data["total_entradas"] == "2000.00"
     assert data["total_saidas"] == "500.00"
     assert data["resultado"] == "1500.00"
@@ -47,7 +51,6 @@ def test_dashboard_summary_with_date_filter(
         "Salário",
         date(2026, 8, 20),
     )
-
     create_transaction(
         account,
         "saida",
@@ -76,7 +79,7 @@ def test_dashboard_summary_without_transactions(
     token,
 ):
     response = client.get(
-        "/dashboard/summary",
+        "/dashboard/summary?start_date=2026-08-20&end_date=2026-08-23",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -106,7 +109,7 @@ def test_dashboard_summary_isolated_by_user(
     )
 
     response = client.get(
-        "/dashboard/summary",
+        "/dashboard/summary?start_date=2026-08-20&end_date=2026-08-23",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -132,7 +135,6 @@ def test_dashboard_category(
         "Aluguel",
         date(2026, 8, 22),
     )
-
     create_transaction(
         account,
         "saida",
@@ -140,7 +142,6 @@ def test_dashboard_category(
         "Mercado",
         date(2026, 8, 23),
     )
-
     create_transaction(
         account,
         "entrada",
@@ -150,7 +151,7 @@ def test_dashboard_category(
     )
 
     response = client.get(
-        "/dashboard/category",
+        "/dashboard/category?start_date=2026-08-20&end_date=2026-08-24",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -192,7 +193,6 @@ def test_dashboard_category_with_date_filter(
         "Aluguel",
         date(2026, 8, 20),
     )
-
     create_transaction(
         account,
         "saida",
@@ -232,7 +232,6 @@ def test_dashboard_history(
         "Salário",
         date(2026, 8, 22),
     )
-
     create_transaction(
         account,
         "saida",
@@ -240,7 +239,6 @@ def test_dashboard_history(
         "Mercado",
         date(2026, 8, 22),
     )
-
     create_transaction(
         account,
         "saida",
@@ -250,7 +248,7 @@ def test_dashboard_history(
     )
 
     response = client.get(
-        "/dashboard/history",
+        "/dashboard/history?start_date=2026-08-20&end_date=2026-08-23",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -258,16 +256,25 @@ def test_dashboard_history(
 
     data = response.json()
 
-    assert data == [
+    assert data["start_date"] == "2026-08-20"
+    assert data["end_date"] == "2026-08-23"
+    assert data["saldo_inicial"] == "1000.00"
+    assert data["saldo_final"] == "2200.00"
+
+    assert data["historico"] == [
         {
             "date": "2026-08-22",
             "entradas": "2000.00",
             "saidas": "500.00",
+            "variacao": "1500.00",
+            "saldo": "2500.00",
         },
         {
             "date": "2026-08-23",
             "entradas": "0.00",
             "saidas": "300.00",
+            "variacao": "-300.00",
+            "saldo": "2200.00",
         },
     ]
 
@@ -285,7 +292,6 @@ def test_dashboard_history_with_date_filter(
         "Salário",
         date(2026, 8, 20),
     )
-
     create_transaction(
         account,
         "saida",
@@ -303,11 +309,18 @@ def test_dashboard_history_with_date_filter(
 
     data = response.json()
 
-    assert data == [
+    assert data["start_date"] == "2026-08-21"
+    assert data["end_date"] == "2026-08-25"
+    assert data["saldo_inicial"] == "3000.00"
+    assert data["saldo_final"] == "2500.00"
+
+    assert data["historico"] == [
         {
             "date": "2026-08-25",
             "entradas": "0.00",
             "saidas": "500.00",
+            "variacao": "-500.00",
+            "saldo": "2500.00",
         }
     ]
 
@@ -325,7 +338,6 @@ def test_dashboard_analysis(
         "Aluguel",
         date(2026, 8, 22),
     )
-
     create_transaction(
         account,
         "saida",
@@ -335,7 +347,7 @@ def test_dashboard_analysis(
     )
 
     response = client.get(
-        "/dashboard/analysis",
+        "/dashboard/analysis?start_date=2026-08-20&end_date=2026-08-23",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -357,7 +369,6 @@ def test_dashboard_analysis(
     ]
 
     assert len(data["insights"]) == 1
-
     assert data["insights"][0]["type"] == "warning"
     assert data["insights"][0]["title"] == "Alta concentração de gastos"
 
@@ -377,7 +388,7 @@ def test_dashboard_analysis_without_expenses(
     )
 
     response = client.get(
-        "/dashboard/analysis",
+        "/dashboard/analysis?start_date=2026-08-20&end_date=2026-08-23",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -390,6 +401,20 @@ def test_dashboard_analysis_without_expenses(
 
 
 def test_dashboard_requires_authentication(client):
-    response = client.get("/dashboard/summary")
+    response = client.get(
+        "/dashboard/summary?start_date=2026-08-20&end_date=2026-08-23",
+    )
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_dashboard_requires_date_filters(
+    client,
+    token,
+):
+    response = client.get(
+        "/dashboard/summary",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

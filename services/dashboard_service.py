@@ -5,6 +5,7 @@ from schemas.dashboard_schema import (
     DashboardAnalysis,
     DashboardCategory,
     DashboardHistory,
+    DashboardHistoryItem,
     DashboardInsight,
     DashboardSummary,
     ExpenseDistribution,
@@ -66,21 +67,42 @@ class DashboardService:
         user_id: int,
         start_date,
         end_date,
-    ) -> list[DashboardHistory]:
+    ) -> DashboardHistory:
+        initial_balance = self.repository.get_initial_balance(
+            user_id=user_id,
+            start_date=start_date,
+        )
+
         history = self.repository.get_history(
             user_id=user_id,
             start_date=start_date,
             end_date=end_date,
         )
 
-        return [
-            DashboardHistory(
-                date=date,
-                entradas=entradas,
-                saidas=saidas,
+        current_balance = initial_balance
+        history_items = []
+
+        for date, entradas, saidas in history:
+            variacao = entradas - saidas
+            current_balance += variacao
+
+            history_items.append(
+                DashboardHistoryItem(
+                    date=date,
+                    entradas=entradas,
+                    saidas=saidas,
+                    variacao=variacao,
+                    saldo=current_balance,
+                )
             )
-            for date, entradas, saidas in history
-        ]
+
+        return DashboardHistory(
+            start_date=start_date,
+            end_date=end_date,
+            saldo_inicial=initial_balance,
+            saldo_final=current_balance,
+            historico=history_items,
+        )
 
     def get_analysis(
         self,
