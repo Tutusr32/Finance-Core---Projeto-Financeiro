@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 
 from dependencies.auth import get_current_user
 from dependencies.transaction import get_transactions_service
-from schemas.transaction_schema import TransactionCreate, TransactionResponse
+from schemas.transaction_schema import TransactionCreate, TransactionFilter, TransactionResponse
 from services.transactions_service import TransacoesService
 
 router = APIRouter(prefix="/accounts", tags=["Transactions"])
@@ -35,10 +35,12 @@ def list_transactions(
     offset: int = Query(0, ge=0),
     service: TransacoesService = Depends(get_transactions_service),
     current_user=Depends(get_current_user),
+    filters: TransactionFilter = Depends(),
 ):
     return service.listar_transacoes(
         user_id=current_user.id,
         conta_id=conta_id,
         limit=limit,
         offset=offset,
+        filters=filters,
     )

@@ -60,9 +60,7 @@ class DashboardRepository:
             statement = statement.where(Transacoes.data >= start_date)
 
         if end_date:
-            statement = statement.where(
-            Transacoes.data < end_date + timedelta(days=1)
-            )
+            statement = statement.where(Transacoes.data < end_date + timedelta(days=1))
 
         result = self.session.execute(statement)
 
@@ -93,9 +91,7 @@ class DashboardRepository:
             statement = statement.where(Transacoes.data >= start_date)
 
         if end_date:
-            statement = statement.where(
-            Transacoes.data < end_date + timedelta(days=1)
-            )
+            statement = statement.where(Transacoes.data < end_date + timedelta(days=1))
 
         result = self.session.execute(statement)
 
@@ -145,9 +141,7 @@ class DashboardRepository:
             statement = statement.where(Transacoes.data >= start_date)
 
         if end_date:
-            statement = statement.where(
-            Transacoes.data < end_date + timedelta(days=1)
-            )
+            statement = statement.where(Transacoes.data < end_date + timedelta(days=1))
 
         result = self.session.execute(statement)
 
@@ -179,9 +173,7 @@ class DashboardRepository:
             statement = statement.where(Transacoes.data >= start_date)
 
         if end_date:
-            statement = statement.where(
-            Transacoes.data < end_date + timedelta(days=1)
-            )
+            statement = statement.where(Transacoes.data < end_date + timedelta(days=1))
 
         result = self.session.execute(statement)
 

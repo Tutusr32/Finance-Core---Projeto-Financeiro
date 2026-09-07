@@ -1,3 +1,4 @@
+from datetime import datetime
 from http import HTTPStatus
 
 
@@ -141,3 +142,93 @@ def test_create_transaction_without_token(client, account):
     )
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_list_transactions(client, account, token, transaction):
+    response = client.get(
+        f"/accounts/{account.id}/transactions",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+    data = response.json()
+
+    assert len(data) == 1
+    assert data[0]["type"] == "entrada"
+    assert data[0]["amount"] == "150.00"
+    assert data[0]["category"] == "Salário"
+
+
+def test_list_transactions_with_limit(
+    client,
+    account,
+    token,
+    create_transaction,
+):
+    create_transaction(
+        account,
+        "entrada",
+        100,
+        "Salário",
+        datetime(2026, 9, 1),
+    )
+    create_transaction(
+        account,
+        "saida",
+        50,
+        "Mercado",
+        datetime(2026, 9, 2),
+    )
+    create_transaction(
+        account,
+        "saida",
+        30,
+        "Transporte",
+        datetime(2026, 9, 3),
+    )
+
+    response = client.get(
+        f"/accounts/{account.id}/transactions?limit=2",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == 2
+
+
+def test_list_transactions_with_offset(
+    client,
+    account,
+    token,
+    create_transaction,
+):
+    create_transaction(
+        account,
+        "entrada",
+        100,
+        "Salário",
+        datetime(2026, 9, 1),
+    )
+    create_transaction(
+        account,
+        "saida",
+        50,
+        "Mercado",
+        datetime(2026, 9, 2),
+    )
+    create_transaction(
+        account,
+        "saida",
+        30,
+        "Transporte",
+        datetime(2026, 9, 3),
+    )
+
+    response = client.get(
+        f"/accounts/{account.id}/transactions?offset=1",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == 2

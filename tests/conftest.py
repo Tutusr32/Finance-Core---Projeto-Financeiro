@@ -144,6 +144,7 @@ def transaction(db_session, account):
     db_session.refresh(transacao)
     return transacao
 
+
 @pytest.fixture
 def create_transaction(db_session):
     def _create_transaction(

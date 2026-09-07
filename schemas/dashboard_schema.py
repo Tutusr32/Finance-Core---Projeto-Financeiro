@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 
 
 class DashboardFilter(BaseModel):
@@ -33,6 +33,10 @@ class ExpenseDistribution(BaseModel):
     category: str
     amount: Decimal
     percentage: Decimal
+
+    @field_serializer("percentage")
+    def serialize_percentage(self, value: Decimal) -> str:
+        return f"{value:.2f}"
 
 
 class DashboardInsight(BaseModel):

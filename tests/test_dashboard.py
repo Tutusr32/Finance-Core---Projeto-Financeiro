@@ -1,13 +1,9 @@
 from datetime import date
-from decimal import Decimal
 from http import HTTPStatus
 
-from models import Transacoes
 
-
-def test_dashboard_summary(client, db_session, account, create_transaction, token):
+def test_dashboard_summary(client, account, create_transaction, token):
     create_transaction(
-        db_session,
         account,
         "entrada",
         2000,
@@ -16,7 +12,6 @@ def test_dashboard_summary(client, db_session, account, create_transaction, toke
     )
 
     create_transaction(
-        db_session,
         account,
         "saida",
         500,
@@ -41,13 +36,11 @@ def test_dashboard_summary(client, db_session, account, create_transaction, toke
 
 def test_dashboard_summary_with_date_filter(
     client,
-    db_session,
     account,
     create_transaction,
     token,
 ):
     create_transaction(
-        db_session,
         account,
         "entrada",
         2000,
@@ -56,7 +49,6 @@ def test_dashboard_summary_with_date_filter(
     )
 
     create_transaction(
-        db_session,
         account,
         "saida",
         500,
@@ -65,9 +57,7 @@ def test_dashboard_summary_with_date_filter(
     )
 
     response = client.get(
-        "/dashboard/summary"
-        "?start_date=2026-08-21"
-        "&end_date=2026-08-25",
+        "/dashboard/summary?start_date=2026-08-21&end_date=2026-08-25",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -102,14 +92,12 @@ def test_dashboard_summary_without_transactions(
 
 def test_dashboard_summary_isolated_by_user(
     client,
-    db_session,
     account,
     other_account,
     create_transaction,
     token,
 ):
     create_transaction(
-        db_session,
         other_account,
         "entrada",
         5000,
@@ -133,13 +121,11 @@ def test_dashboard_summary_isolated_by_user(
 
 def test_dashboard_category(
     client,
-    db_session,
     account,
     create_transaction,
     token,
 ):
     create_transaction(
-        db_session,
         account,
         "saida",
         1000,
@@ -148,7 +134,6 @@ def test_dashboard_category(
     )
 
     create_transaction(
-        db_session,
         account,
         "saida",
         500,
@@ -157,7 +142,6 @@ def test_dashboard_category(
     )
 
     create_transaction(
-        db_session,
         account,
         "entrada",
         2000,
@@ -197,13 +181,11 @@ def test_dashboard_category(
 
 def test_dashboard_category_with_date_filter(
     client,
-    db_session,
     account,
     create_transaction,
     token,
 ):
     create_transaction(
-        db_session,
         account,
         "saida",
         1000,
@@ -212,7 +194,6 @@ def test_dashboard_category_with_date_filter(
     )
 
     create_transaction(
-        db_session,
         account,
         "saida",
         500,
@@ -221,9 +202,7 @@ def test_dashboard_category_with_date_filter(
     )
 
     response = client.get(
-        "/dashboard/category"
-        "?start_date=2026-08-21"
-        "&end_date=2026-08-25",
+        "/dashboard/category?start_date=2026-08-21&end_date=2026-08-25",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -242,13 +221,11 @@ def test_dashboard_category_with_date_filter(
 
 def test_dashboard_history(
     client,
-    db_session,
     account,
     create_transaction,
     token,
 ):
     create_transaction(
-        db_session,
         account,
         "entrada",
         2000,
@@ -257,7 +234,6 @@ def test_dashboard_history(
     )
 
     create_transaction(
-        db_session,
         account,
         "saida",
         500,
@@ -266,7 +242,6 @@ def test_dashboard_history(
     )
 
     create_transaction(
-        db_session,
         account,
         "saida",
         300,
@@ -299,13 +274,11 @@ def test_dashboard_history(
 
 def test_dashboard_history_with_date_filter(
     client,
-    db_session,
     account,
     create_transaction,
     token,
 ):
     create_transaction(
-        db_session,
         account,
         "entrada",
         2000,
@@ -314,7 +287,6 @@ def test_dashboard_history_with_date_filter(
     )
 
     create_transaction(
-        db_session,
         account,
         "saida",
         500,
@@ -323,9 +295,7 @@ def test_dashboard_history_with_date_filter(
     )
 
     response = client.get(
-        "/dashboard/history"
-        "?start_date=2026-08-21"
-        "&end_date=2026-08-25",
+        "/dashboard/history?start_date=2026-08-21&end_date=2026-08-25",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -344,13 +314,11 @@ def test_dashboard_history_with_date_filter(
 
 def test_dashboard_analysis(
     client,
-    db_session,
     account,
     create_transaction,
     token,
 ):
     create_transaction(
-        db_session,
         account,
         "saida",
         4000,
@@ -359,7 +327,6 @@ def test_dashboard_analysis(
     )
 
     create_transaction(
-        db_session,
         account,
         "saida",
         1000,
@@ -397,13 +364,11 @@ def test_dashboard_analysis(
 
 def test_dashboard_analysis_without_expenses(
     client,
-    db_session,
     account,
     create_transaction,
     token,
 ):
     create_transaction(
-        db_session,
         account,
         "entrada",
         2000,
