@@ -35,7 +35,6 @@ class ContasRepository:
         user_id: int,
         conta_id: int,
         name=None,
-        saldo=None,
         commit: bool = True,
     ):
         conta = (
@@ -52,9 +51,6 @@ class ContasRepository:
 
         if name is not None:
             conta.name = name
-
-        if saldo is not None:
-            conta.saldo = saldo
 
         if commit:
             self.session.commit()

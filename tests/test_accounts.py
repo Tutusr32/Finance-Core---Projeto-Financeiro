@@ -72,7 +72,12 @@ def test_get_account_not_found(client, token):
     assert response.json() == {"detail": "Conta não encontrada."}
 
 
-def test_get_account_other_user(client, other_user, other_account, token):
+def test_get_account_other_user(
+    client,
+    other_user,
+    other_account,
+    token,
+):
     response = client.get(
         f"/accounts/{other_account.id}",
         headers={"Authorization": f"Bearer {token}"},
@@ -83,7 +88,9 @@ def test_get_account_other_user(client, other_user, other_account, token):
 
 
 def test_get_account_without_token(client, account):
-    response = client.get(f"/accounts/{account.id}")
+    response = client.get(
+        f"/accounts/{account.id}",
+    )
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
@@ -106,44 +113,6 @@ def test_update_account_name(client, account, token):
     assert data["updated_at"] is not None
 
 
-def test_update_account_balance(client, account, token):
-    response = client.patch(
-        f"/accounts/{account.id}",
-        headers={"Authorization": f"Bearer {token}"},
-        json={
-            "saldo": 500,
-        },
-    )
-
-    assert response.status_code == HTTPStatus.OK
-
-    data = response.json()
-
-    assert data["saldo"] == "500.00"
-    assert data["created_at"] is not None
-    assert data["updated_at"] is not None
-
-
-def test_update_account_multiple_fields(client, account, token):
-    response = client.patch(
-        f"/accounts/{account.id}",
-        headers={"Authorization": f"Bearer {token}"},
-        json={
-            "name": "Nubank",
-            "saldo": 350,
-        },
-    )
-
-    assert response.status_code == HTTPStatus.OK
-
-    data = response.json()
-
-    assert data["name"] == "Nubank"
-    assert data["saldo"] == "350.00"
-    assert data["created_at"] is not None
-    assert data["updated_at"] is not None
-
-
 def test_update_account_updates_updated_at(client, account, token):
     response = client.get(
         f"/accounts/{account.id}",
@@ -157,7 +126,9 @@ def test_update_account_updates_updated_at(client, account, token):
     response = client.patch(
         f"/accounts/{account.id}",
         headers={"Authorization": f"Bearer {token}"},
-        json={"name": "Conta Atualizada"},
+        json={
+            "name": "Conta Atualizada",
+        },
     )
 
     assert response.status_code == HTTPStatus.OK
@@ -166,19 +137,6 @@ def test_update_account_updates_updated_at(client, account, token):
 
     assert after["created_at"] == before["created_at"]
     assert after["updated_at"] != before["updated_at"]
-
-
-def test_update_account_negative_balance(client, account, token):
-    response = client.patch(
-        f"/accounts/{account.id}",
-        headers={"Authorization": f"Bearer {token}"},
-        json={
-            "saldo": -100,
-        },
-    )
-
-    assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert response.json() == {"detail": "Saldo não pode ser negativo."}
 
 
 def test_update_account_not_found(client, token):
@@ -249,7 +207,11 @@ def test_delete_account_not_found(client, token):
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_delete_account_other_user(client, other_account, token):
+def test_delete_account_other_user(
+    client,
+    other_account,
+    token,
+):
     response = client.delete(
         f"/accounts/{other_account.id}",
         headers={"Authorization": f"Bearer {token}"},
@@ -259,6 +221,8 @@ def test_delete_account_other_user(client, other_account, token):
 
 
 def test_delete_account_without_token(client, account):
-    response = client.delete(f"/accounts/{account.id}")
+    response = client.delete(
+        f"/accounts/{account.id}",
+    )
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED

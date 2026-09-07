@@ -22,4 +22,3 @@ class ContaResponse(BaseModel):
 
 class ContaUpdate(BaseModel):
     name: str | None = None
-    saldo: Decimal | None = None

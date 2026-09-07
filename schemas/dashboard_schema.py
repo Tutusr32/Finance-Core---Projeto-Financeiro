@@ -23,10 +23,20 @@ class DashboardCategory(BaseModel):
     total: Decimal
 
 
-class DashboardHistory(BaseModel):
+class DashboardHistoryItem(BaseModel):
     date: date
     entradas: Decimal
     saidas: Decimal
+    variacao: Decimal
+    saldo: Decimal
+
+
+class DashboardHistory(BaseModel):
+    start_date: date
+    end_date: date
+    saldo_inicial: Decimal
+    saldo_final: Decimal
+    historico: list[DashboardHistoryItem]
 
 
 class ExpenseDistribution(BaseModel):
