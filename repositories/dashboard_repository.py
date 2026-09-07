@@ -147,6 +147,38 @@ class DashboardRepository:
 
         return result.all()
 
+    def get_initial_balance(
+        self,
+        user_id: int,
+        start_date: date,
+    ) -> Decimal:
+        net_movement = func.coalesce(
+            func.sum(
+                case(
+                    (Transacoes.tipo == "entrada", Transacoes.valor),
+                    (Transacoes.tipo == "saida", -Transacoes.valor),
+                    else_=0,
+                )
+            ),
+            0,
+        )
+
+        statement = (
+            select(net_movement)
+            .join(Contas, Transacoes.conta_id == Contas.id)
+            .where(
+                Contas.user_id == user_id,
+                Transacoes.data >= start_date,
+            )
+        )
+
+        result = self.session.execute(statement)
+
+        current_balance = self.get_total_balance(user_id)
+        movement = result.scalar_one()
+
+        return current_balance - movement
+
     def get_analysis(
         self,
         user_id: int,

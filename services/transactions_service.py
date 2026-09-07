@@ -27,10 +27,6 @@ class TransacoesService:
         if transaction.type == "entrada":
             conta.saldo += transaction.amount
 
-        self.contas_repo.update(
-            user_id=conta.user_id, conta_id=conta.id, saldo=conta.saldo, commit=False
-        )
-
         transacao = self.repo.create(
             conta_id, transaction.type, transaction.amount, transaction.category, commit=False
         )

@@ -55,7 +55,7 @@ def get_category(
 
 @router.get(
     "/history",
-    response_model=list[DashboardHistory],
+    response_model=DashboardHistory,
     status_code=HTTPStatus.OK,
 )
 def get_history(

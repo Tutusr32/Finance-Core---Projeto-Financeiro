@@ -154,17 +154,26 @@ def create_transaction(db_session):
         category,
         transaction_date,
     ):
+        amount = Decimal(str(amount))
+
         transaction = Transacoes(
             conta_id=account.id,
             tipo=transaction_type,
-            valor=Decimal(str(amount)),
+            valor=amount,
             categoria=category,
             data=transaction_date,
         )
 
         db_session.add(transaction)
+
+        if transaction_type == "entrada":
+            account.saldo += amount
+        else:
+            account.saldo -= amount
+
         db_session.commit()
         db_session.refresh(transaction)
+        db_session.refresh(account)
 
         return transaction
 

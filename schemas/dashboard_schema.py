@@ -6,8 +6,8 @@ from pydantic import BaseModel, field_serializer
 
 
 class DashboardFilter(BaseModel):
-    start_date: date | None = None
-    end_date: date | None = None
+    start_date: date
+    end_date: date
 
 
 class DashboardSummary(BaseModel):
