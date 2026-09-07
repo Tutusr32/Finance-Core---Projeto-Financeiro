@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from mappers.transaction_mapper import transacao_to_dict
-from schemas.transaction_schema import TransactionCreate
+from schemas.transaction_schema import TransactionCreate, TransactionFilter
 
 
 class TransacoesService:
@@ -46,7 +46,15 @@ class TransacoesService:
 
         return transacao_to_dict(transacao)
 
-    def listar_transacoes(self, user_id: int, conta_id: int, limit: int, offset: int):
+    def listar_transacoes(
+        self,
+        user_id: int,
+        conta_id: int,
+        limit: int,
+        offset: int,
+        filters: TransactionFilter,
+    ):
+
         conta = self.contas_repo.get_by_id(conta_id)
 
         if not conta:
@@ -61,6 +69,14 @@ class TransacoesService:
                 detail="Acesso negado.",
             )
 
-        transacoes = self.repo.get_by_conta(conta_id=conta_id, limit=limit, offset=offset)
+        transacoes = self.repo.get_by_conta(
+            conta_id=conta_id,
+            limit=limit,
+            offset=offset,
+            tipo=filters.type,
+            categoria=filters.category,
+            start_date=filters.start_date,
+            end_date=filters.end_date,
+        )
 
         return [transacao_to_dict(t) for t in transacoes]
