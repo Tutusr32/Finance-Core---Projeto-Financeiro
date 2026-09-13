@@ -1,7 +1,9 @@
+from collections.abc import Sequence
 from datetime import date, timedelta
 from decimal import Decimal
 
 from sqlalchemy import case, func, select
+from sqlalchemy.engine import Row
 from sqlalchemy.orm import Session
 
 from models.contas import Contas
@@ -26,7 +28,7 @@ class DashboardRepository:
         user_id: int,
         start_date: date | None,
         end_date: date | None,
-    ):
+    ) -> Sequence[Row]:
         income = func.coalesce(
             func.sum(
                 case(
@@ -71,7 +73,7 @@ class DashboardRepository:
         user_id: int,
         start_date: date | None,
         end_date: date | None,
-    ):
+    ) -> Sequence[Row]:
         statement = (
             select(
                 Transacoes.categoria,
@@ -102,7 +104,7 @@ class DashboardRepository:
         user_id: int,
         start_date: date | None,
         end_date: date | None,
-    ):
+    ) -> Sequence[Row]:
         statement = (
             select(
                 func.date(Transacoes.data).label("date"),
@@ -184,7 +186,7 @@ class DashboardRepository:
         user_id: int,
         start_date: date | None,
         end_date: date | None,
-    ):
+    ) -> Sequence[Row]:
         expense = func.sum(Transacoes.valor).label("total")
 
         statement = (

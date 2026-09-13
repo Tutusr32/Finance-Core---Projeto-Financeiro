@@ -110,33 +110,41 @@ class DashboardService:
         start_date,
         end_date,
     ) -> DashboardAnalysis:
-        analysis = self.repository.get_analysis(
+        expense_analysis = self.repository.get_analysis(
+            user_id=user_id,
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        summary = self.repository.get_summary(
             user_id=user_id,
             start_date=start_date,
             end_date=end_date,
         )
 
         total_expenses = sum(
-            (amount for _, amount in analysis),
+            (amount for _, amount in expense_analysis),
             Decimal("0"),
         )
 
-        expense_distribution = []
-
-        for category, amount in analysis:
-            percentage = (
-                (amount / total_expenses) * Decimal("100") if total_expenses > 0 else Decimal("0")
+        expense_distribution = [
+            ExpenseDistribution(
+                category=category,
+                amount=amount,
+                percentage=(
+                    (amount / total_expenses) * Decimal("100")
+                    if total_expenses > 0
+                    else Decimal("0")
+                ),
             )
+            for category, amount in expense_analysis
+        ]
 
-            expense_distribution.append(
-                ExpenseDistribution(
-                    category=category,
-                    amount=amount,
-                    percentage=percentage,
-                )
-            )
-
-        insights = self._generate_insights(expense_distribution)
+        insights = self._generate_insights(
+            total_income=summary.total_income,
+            total_expenses=summary.total_expense,
+            expense_distribution=expense_distribution,
+        )
 
         return DashboardAnalysis(
             expense_distribution=expense_distribution,
@@ -145,58 +153,148 @@ class DashboardService:
 
     def _generate_insights(
         self,
-        distribution: list[ExpenseDistribution],
+        total_income: Decimal,
+        total_expenses: Decimal,
+        expense_distribution: list[ExpenseDistribution],
     ) -> list[DashboardInsight]:
-
         insights = []
 
-        if not distribution:
+        result = total_income - total_expenses
+
+        insights.extend(
+            self._generate_result_insights(
+                total_income=total_income,
+                total_expenses=total_expenses,
+                result=result,
+            )
+        )
+
+        insights.extend(
+            self._generate_category_insights(
+                expense_distribution=expense_distribution,
+            )
+        )
+
+        return insights
+
+    def _generate_result_insights(
+        self,
+        total_income: Decimal,
+        total_expenses: Decimal,
+        result: Decimal,
+    ) -> list[DashboardInsight]:
+        insights = []
+
+        if result < 0:
+            insights.append(
+                DashboardInsight(
+                    rule="NEGATIVE_RESULT",
+                    type="warning",
+                    severity="high",
+                    title="Resultado financeiro negativo",
+                    description=(
+                        f"Suas despesas superaram suas entradas em R$ {abs(result):.2f} no período."
+                    ),
+                    metric={
+                        "income": total_income,
+                        "expenses": total_expenses,
+                        "result": result,
+                    },
+                )
+            )
+
+        elif result > 0:
+            insights.append(
+                DashboardInsight(
+                    rule="POSITIVE_RESULT",
+                    type="info",
+                    severity="low",
+                    title="Resultado financeiro positivo",
+                    description=(
+                        f"Suas entradas superaram suas despesas em R$ {result:.2f} no período."
+                    ),
+                    metric={
+                        "income": total_income,
+                        "expenses": total_expenses,
+                        "result": result,
+                    },
+                )
+            )
+
+        return insights
+
+    def _generate_category_insights(
+        self,
+        expense_distribution: list[ExpenseDistribution],
+    ) -> list[DashboardInsight]:
+        insights = []
+
+        if not expense_distribution:
             return insights
 
-        biggest_category = distribution[0]
+        biggest_category = expense_distribution[0]
 
         if biggest_category.percentage >= Decimal("40"):
             insights.append(
                 DashboardInsight(
+                    rule="HIGH_CATEGORY_CONCENTRATION",
                     type="warning",
+                    severity="medium",
                     title="Alta concentração de gastos",
                     description=(
+                        f"{biggest_category.category} representa "
                         f"{biggest_category.percentage:.2f}% "
-                        f"das suas despesas estão em "
-                        f"{biggest_category.category}."
+                        f"das suas despesas."
                     ),
+                    metric={
+                        "category": biggest_category.category,
+                        "percentage": f"{biggest_category.percentage:.2f}",
+                        "amount": biggest_category.amount,
+                    },
                 )
             )
 
         elif biggest_category.percentage >= Decimal("25"):
             insights.append(
                 DashboardInsight(
+                    rule="MAIN_EXPENSE_CATEGORY",
                     type="info",
+                    severity="low",
                     title="Principal categoria de gasto",
                     description=(
                         f"{biggest_category.category} representa "
                         f"{biggest_category.percentage:.2f}% "
                         f"das suas despesas."
                     ),
+                    metric={
+                        "category": biggest_category.category,
+                        "percentage": f"{biggest_category.percentage:.2f}",
+                        "amount": biggest_category.amount,
+                    },
                 )
             )
 
-        if len(distribution) >= 3:
+        if len(expense_distribution) >= 3:
             top_three_percentage = sum(
-                (item.percentage for item in distribution[:3]),
+                (item.percentage for item in expense_distribution[:3]),
                 Decimal("0"),
             )
 
             if top_three_percentage >= Decimal("70"):
                 insights.append(
                     DashboardInsight(
+                        rule="TOP_THREE_CONCENTRATION",
                         type="recommendation",
+                        severity="medium",
                         title="Despesas concentradas",
                         description=(
                             f"As três maiores categorias representam "
                             f"{top_three_percentage:.2f}% "
                             f"das suas despesas."
                         ),
+                        metric={
+                            "percentage": f"{top_three_percentage:.2f}",
+                        },
                     )
                 )
 

@@ -50,9 +50,12 @@ class ExpenseDistribution(BaseModel):
 
 
 class DashboardInsight(BaseModel):
+    rule: str
     type: Literal["info", "warning", "recommendation"]
+    severity: Literal["low", "medium", "high"]
     title: str
     description: str
+    metric: dict | None = None
 
 
 class DashboardAnalysis(BaseModel):
