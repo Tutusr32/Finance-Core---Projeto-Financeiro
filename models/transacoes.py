@@ -14,7 +14,15 @@ class Transacoes(Base):
     categoria = Column(String(50), nullable=False)
     data = Column(DateTime, server_default=func.now())
 
-    conta = relationship("Contas", back_populates="transacoes")
+    conta = relationship(
+        "Contas",
+        back_populates="transacoes",
+    )
+
+    ocorrencia_recorrente = relationship(
+        "OcorrenciasRecorrentes",
+        back_populates="transacao",
+    )
 
     def __repr__(self):
         return (

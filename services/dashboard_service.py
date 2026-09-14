@@ -16,12 +16,7 @@ class DashboardService:
     def __init__(self, repository: DashboardRepository):
         self.repository = repository
 
-    def get_summary(
-        self,
-        user_id: int,
-        start_date,
-        end_date,
-    ) -> DashboardSummary:
+    def get_summary(self, user_id: int, start_date, end_date) -> DashboardSummary:
         saldo_total = self.repository.get_total_balance(user_id)
 
         summary = self.repository.get_summary(
@@ -41,12 +36,7 @@ class DashboardService:
             resultado=resultado,
         )
 
-    def get_category_summary(
-        self,
-        user_id: int,
-        start_date,
-        end_date,
-    ) -> list[DashboardCategory]:
+    def get_category_summary(self, user_id: int, start_date, end_date) -> list[DashboardCategory]:
         categories = self.repository.get_category_summary(
             user_id=user_id,
             start_date=start_date,
@@ -62,12 +52,7 @@ class DashboardService:
             for category, transaction_type, total in categories
         ]
 
-    def get_history(
-        self,
-        user_id: int,
-        start_date,
-        end_date,
-    ) -> DashboardHistory:
+    def get_history(self, user_id: int, start_date, end_date) -> DashboardHistory:
         initial_balance = self.repository.get_initial_balance(
             user_id=user_id,
             start_date=start_date,
@@ -104,12 +89,7 @@ class DashboardService:
             historico=history_items,
         )
 
-    def get_analysis(
-        self,
-        user_id: int,
-        start_date,
-        end_date,
-    ) -> DashboardAnalysis:
+    def get_analysis(self, user_id: int, start_date, end_date) -> DashboardAnalysis:
         expense_analysis = self.repository.get_analysis(
             user_id=user_id,
             start_date=start_date,
@@ -224,8 +204,7 @@ class DashboardService:
         return insights
 
     def _generate_category_insights(
-        self,
-        expense_distribution: list[ExpenseDistribution],
+        self, expense_distribution: list[ExpenseDistribution]
     ) -> list[DashboardInsight]:
         insights = []
 
