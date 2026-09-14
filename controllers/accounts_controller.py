@@ -28,11 +28,7 @@ def get_account(
     return service.buscar_conta(user_id=current_user.id, conta_id=conta_id)
 
 
-@router.patch(
-    "/{conta_id}",
-    response_model=ContaResponse,
-    status_code=HTTPStatus.OK,
-)
+@router.patch("/{conta_id}", response_model=ContaResponse, status_code=HTTPStatus.OK)
 def update_account(
     conta_id: int,
     account: ContaUpdate,
@@ -46,10 +42,7 @@ def update_account(
     )
 
 
-@router.delete(
-    "/{conta_id}",
-    status_code=HTTPStatus.NO_CONTENT,
-)
+@router.delete("/{conta_id}", status_code=HTTPStatus.NO_CONTENT)
 def delete_account(
     conta_id: int,
     service: ContaService = Depends(get_accounts_service),

@@ -13,17 +13,10 @@ from schemas.dashboard_schema import (
 )
 from services.dashboard_service import DashboardService
 
-router = APIRouter(
-    prefix="/dashboard",
-    tags=["Dashboard"],
-)
+router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 
-@router.get(
-    "/summary",
-    response_model=DashboardSummary,
-    status_code=HTTPStatus.OK,
-)
+@router.get("/summary", response_model=DashboardSummary, status_code=HTTPStatus.OK)
 def get_summary(
     filters: DashboardFilter = Depends(),
     service: DashboardService = Depends(get_dashboard_service),
@@ -36,11 +29,7 @@ def get_summary(
     )
 
 
-@router.get(
-    "/category",
-    response_model=list[DashboardCategory],
-    status_code=HTTPStatus.OK,
-)
+@router.get("/category", response_model=list[DashboardCategory], status_code=HTTPStatus.OK)
 def get_category(
     filters: DashboardFilter = Depends(),
     service: DashboardService = Depends(get_dashboard_service),
@@ -53,11 +42,7 @@ def get_category(
     )
 
 
-@router.get(
-    "/history",
-    response_model=DashboardHistory,
-    status_code=HTTPStatus.OK,
-)
+@router.get("/history", response_model=DashboardHistory, status_code=HTTPStatus.OK)
 def get_history(
     filters: DashboardFilter = Depends(),
     service: DashboardService = Depends(get_dashboard_service),
@@ -70,11 +55,7 @@ def get_history(
     )
 
 
-@router.get(
-    "/analysis",
-    response_model=DashboardAnalysis,
-    status_code=HTTPStatus.OK,
-)
+@router.get("/analysis", response_model=DashboardAnalysis, status_code=HTTPStatus.OK)
 def get_analysis(
     filters: DashboardFilter = Depends(),
     service: DashboardService = Depends(get_dashboard_service),

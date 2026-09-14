@@ -391,7 +391,7 @@ def test_dashboard_analysis(
         "description": ("Aluguel representa 80.00% das suas despesas."),
         "metric": {
             "category": "Aluguel",
-            "percentage": "80.0",
+            "percentage": "80.00",
             "amount": "4000.00",
         },
     }
@@ -474,7 +474,7 @@ def test_dashboard_analysis_with_zero_result(
 
     assert data["insights"][0]["metric"] == {
         "category": "Mercado",
-        "percentage": "100",
+        "percentage": "100.00",
         "amount": "1000.00",
     }
 

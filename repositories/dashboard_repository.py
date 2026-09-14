@@ -24,10 +24,7 @@ class DashboardRepository:
         return result.scalar_one()
 
     def get_summary(
-        self,
-        user_id: int,
-        start_date: date | None,
-        end_date: date | None,
+        self, user_id: int, start_date: date | None, end_date: date | None
     ) -> Sequence[Row]:
         income = func.coalesce(
             func.sum(
@@ -69,10 +66,7 @@ class DashboardRepository:
         return result.one()
 
     def get_category_summary(
-        self,
-        user_id: int,
-        start_date: date | None,
-        end_date: date | None,
+        self, user_id: int, start_date: date | None, end_date: date | None
     ) -> Sequence[Row]:
         statement = (
             select(
@@ -100,10 +94,7 @@ class DashboardRepository:
         return result.all()
 
     def get_history(
-        self,
-        user_id: int,
-        start_date: date | None,
-        end_date: date | None,
+        self, user_id: int, start_date: date | None, end_date: date | None
     ) -> Sequence[Row]:
         statement = (
             select(
@@ -149,11 +140,7 @@ class DashboardRepository:
 
         return result.all()
 
-    def get_initial_balance(
-        self,
-        user_id: int,
-        start_date: date,
-    ) -> Decimal:
+    def get_initial_balance(self, user_id: int, start_date: date) -> Decimal:
         net_movement = func.coalesce(
             func.sum(
                 case(
@@ -182,10 +169,7 @@ class DashboardRepository:
         return current_balance - movement
 
     def get_analysis(
-        self,
-        user_id: int,
-        start_date: date | None,
-        end_date: date | None,
+        self, user_id: int, start_date: date | None, end_date: date | None
     ) -> Sequence[Row]:
         expense = func.sum(Transacoes.valor).label("total")
 

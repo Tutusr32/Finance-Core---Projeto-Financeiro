@@ -30,13 +30,7 @@ class ContasRepository:
         self.session.refresh(conta)
         return conta
 
-    def update(
-        self,
-        user_id: int,
-        conta_id: int,
-        name=None,
-        commit: bool = True,
-    ):
+    def update(self, user_id: int, conta_id: int, name=None, commit: bool = True):
         conta = (
             self.session.query(Contas)
             .filter(
@@ -58,11 +52,7 @@ class ContasRepository:
 
         return conta
 
-    def delete(
-        self,
-        user_id: int,
-        conta_id: int,
-    ):
+    def delete(self, user_id: int, conta_id: int):
         conta = (
             self.session.query(Contas)
             .filter(

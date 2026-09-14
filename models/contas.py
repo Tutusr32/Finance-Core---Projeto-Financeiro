@@ -34,6 +34,12 @@ class Contas(Base):
         cascade="all, delete-orphan",
     )
 
+    transacoes_recorrentes = relationship(
+        "TransacoesRecorrentes",
+        back_populates="conta",
+        cascade="all, delete-orphan",
+    )
+
     def __repr__(self):
         return (
             f"<Conta(id={self.id}, user_id={self.user_id}, name='{self.name}', saldo={self.saldo})>"

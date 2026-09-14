@@ -7,14 +7,7 @@ class TransacaoRepository:
     def __init__(self, session):
         self.session = session
 
-    def create(
-        self,
-        conta_id: int,
-        tipo: str,
-        valor,
-        categoria: str,
-        commit: bool = True,
-    ):
+    def create(self, conta_id: int, tipo: str, valor, categoria: str):
         transacao = Transacoes(
             conta_id=conta_id,
             tipo=tipo,
@@ -23,10 +16,6 @@ class TransacaoRepository:
         )
 
         self.session.add(transacao)
-
-        if commit:
-            self.session.commit()
-            self.session.refresh(transacao)
 
         return transacao
 

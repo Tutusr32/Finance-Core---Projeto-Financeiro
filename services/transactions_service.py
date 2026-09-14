@@ -9,7 +9,9 @@ class TransacoesService:
         self.repo = repo
         self.contas_repo = contas_repo
 
-    def criar_transacao(self, user_id: int, conta_id: int, transaction: TransactionCreate):
+    def criar_transacao(
+        self, user_id: int, conta_id: int, transaction: TransactionCreate, commit: bool = True
+    ):
         conta = self.contas_repo.get_by_id(conta_id)
 
         if not conta:
@@ -28,29 +30,26 @@ class TransacoesService:
             conta.saldo += transaction.amount
 
         transacao = self.repo.create(
-            conta_id, transaction.type, transaction.amount, transaction.category, commit=False
+            conta_id,
+            transaction.type,
+            transaction.amount,
+            transaction.category,
         )
 
-        try:
-            self.repo.session.commit()
+        if commit:
+            try:
+                self.repo.session.commit()
+            except Exception:
+                self.repo.session.rollback()
+                raise
 
-        except Exception:
-            self.repo.session.rollback()
-            raise
+            self.repo.session.refresh(transacao)
 
-        self.repo.session.refresh(transacao)
-
-        return transacao_to_dict(transacao)
+        return transacao
 
     def listar_transacoes(
-        self,
-        user_id: int,
-        conta_id: int,
-        limit: int,
-        offset: int,
-        filters: TransactionFilter,
+        self, user_id: int, conta_id: int, limit: int, offset: int, filters: TransactionFilter
     ):
-
         conta = self.contas_repo.get_by_id(conta_id)
 
         if not conta:
