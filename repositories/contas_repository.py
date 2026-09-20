@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from models.contas import Contas
@@ -21,6 +22,18 @@ class ContasRepository:
             .options(joinedload(Contas.user))
             .filter(Contas.id == conta_id)
             .first()
+        )
+
+    def get_by_id_for_update(self, conta_id: int):
+        return (
+            self.session.execute(
+                select(Contas)
+                .options(joinedload(Contas.user))
+                .where(Contas.id == conta_id)
+                .with_for_update()
+            )
+            .unique()
+            .scalar_one_or_none()
         )
 
     def create(self, user_id: int, name: str, saldo):
@@ -67,5 +80,5 @@ class ContasRepository:
 
         self.session.delete(conta)
         self.session.commit()
-
         return True
+    
