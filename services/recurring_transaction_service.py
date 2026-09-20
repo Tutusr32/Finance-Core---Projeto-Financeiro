@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from core.recurring import calculate_next_date
 from models.transacoes_recorrentes import TransacoesRecorrentes
 from repositories.transacoes_recorrentes_repository import TransacoesRecorrentesRepository
@@ -69,10 +71,18 @@ class TransacoesRecorrentesService:
         update_data = data.model_dump(exclude_unset=True)
 
         if "frequencia" in update_data:
-            recurring_transaction.proxima_data = calculate_next_date(
-                current_date=recurring_transaction.data_inicio,
-                frequency=update_data["frequencia"],
-            )
+            next_date = recurring_transaction.proxima_data
+            frequency = update_data["frequencia"]
+
+            today = datetime.now(timezone.utc).date()
+
+            while next_date < today:
+                next_date = calculate_next_date(
+                    current_date=next_date,
+                    frequency=frequency,
+                )
+
+            recurring_transaction.proxima_data = next_date
 
         for field, value in update_data.items():
             setattr(recurring_transaction, field, value)

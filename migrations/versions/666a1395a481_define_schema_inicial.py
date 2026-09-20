@@ -10,7 +10,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "666a1395a481"
 down_revision: Union[str, Sequence[str], None] = None
@@ -62,5 +61,4 @@ def downgrade() -> None:
     op.drop_table("transacoes")
     op.drop_table("contas")
     op.drop_table("users")
-
     
