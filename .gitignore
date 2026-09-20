@@ -18,9 +18,6 @@ __pycache__/
 .env
 .env.docker
 
-# docker
-.dockerignore
-docker-compose.yml
 
 # Banco local / arquivos temporários
 *.sqlite3

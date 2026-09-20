@@ -1,4 +1,4 @@
-// Esse arquivo serve para refletir o mapa do banco atual, apenas exposição. Considere usar o alembic.
+-- Esse arquivo serve para refletir o mapa do banco atual, apenas exposição. Considere usar o alembic.
 
 USE finance_core;
 
