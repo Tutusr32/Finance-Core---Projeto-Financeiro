@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 
 from models.transacoes_recorrentes import TransacoesRecorrentes
 from repositories.transacoes_recorrentes_repository import TransacoesRecorrentesRepository
@@ -93,3 +93,101 @@ def test_update_recurring_transaction(db_session, user, account):
     assert result.valor == 700
     assert result.categoria == "Aluguel + condomínio"
     assert result.ativo is False
+
+
+def test_update_recurring_transaction_frequency_with_future_date(db_session, user, account):
+    future_date = datetime.now(timezone.utc).date() + timedelta(days=30)
+
+    recurring_transaction = TransacoesRecorrentes(
+        conta_id=account.id,
+        tipo="saida",
+        valor=500,
+        categoria="Aluguel",
+        frequencia="mensal",
+        data_inicio=date(2026, 9, 13),
+        proxima_data=future_date,
+    )
+
+    db_session.add(recurring_transaction)
+    db_session.commit()
+    db_session.refresh(recurring_transaction)
+
+    repository = TransacoesRecorrentesRepository(db_session)
+    service = TransacoesRecorrentesService(repository=repository)
+
+    data = TransacaoRecorrenteUpdate(frequencia="semanal")
+
+    result = service.update(
+        user_id=user.id,
+        recurring_transaction_id=recurring_transaction.id,
+        data=data,
+    )
+
+    assert result.frequencia == "semanal"
+    assert result.proxima_data == future_date
+
+
+def test_update_recurring_transaction_frequency_with_today_date(db_session, user, account):
+    today = datetime.now(timezone.utc).date()
+
+    recurring_transaction = TransacoesRecorrentes(
+        conta_id=account.id,
+        tipo="saida",
+        valor=500,
+        categoria="Aluguel",
+        frequencia="mensal",
+        data_inicio=date(2026, 9, 13),
+        proxima_data=today,
+    )
+
+    db_session.add(recurring_transaction)
+    db_session.commit()
+    db_session.refresh(recurring_transaction)
+
+    repository = TransacoesRecorrentesRepository(db_session)
+    service = TransacoesRecorrentesService(repository=repository)
+
+    data = TransacaoRecorrenteUpdate(frequencia="semanal")
+
+    result = service.update(
+        user_id=user.id,
+        recurring_transaction_id=recurring_transaction.id,
+        data=data,
+    )
+
+    assert result.frequencia == "semanal"
+    assert result.proxima_data == today
+
+
+def test_update_recurring_transaction_frequency_with_past_date(db_session, user, account):
+    today = datetime.now(timezone.utc).date()
+    past_date = today - timedelta(days=365)
+
+    recurring_transaction = TransacoesRecorrentes(
+        conta_id=account.id,
+        tipo="saida",
+        valor=500,
+        categoria="Aluguel",
+        frequencia="mensal",
+        data_inicio=date(2026, 9, 13),
+        proxima_data=past_date,
+    )
+
+    db_session.add(recurring_transaction)
+    db_session.commit()
+    db_session.refresh(recurring_transaction)
+
+    repository = TransacoesRecorrentesRepository(db_session)
+    service = TransacoesRecorrentesService(repository=repository)
+
+    data = TransacaoRecorrenteUpdate(frequencia="semanal")
+
+    result = service.update(
+        user_id=user.id,
+        recurring_transaction_id=recurring_transaction.id,
+        data=data,
+    )
+
+    assert result.frequencia == "semanal"
+    assert result.proxima_data >= today
+    
