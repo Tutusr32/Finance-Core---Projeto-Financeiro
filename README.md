@@ -1,532 +1,447 @@
 # Finance Core
 
-O Finance Core é uma API para gerenciamento financeiro pessoal, desenvolvida em Python com FastAPI e SQLAlchemy. O projeto permite o gerenciamento de usuários, contas e transações financeiras, além de disponibilizar um dashboard para análise e acompanhamento das movimentações.
+API REST de gerenciamento financeiro pessoal, desenvolvida para consolidar fundamentos de backend em Python e evoluir uma aplicação de CRUD para um sistema com regras de negócio, autenticação, análises financeiras e automação.
 
-O projeto foi desenvolvido com foco em organização de código, separação de responsabilidades, segurança, validações, testes e aplicação de conceitos de desenvolvimento de APIs.
+O projeto foi construído com foco em **separação de responsabilidades, persistência relacional, segurança, testes e evolução incremental da arquitetura**.
+
+> **Status:** projeto de portfólio / estudo avançado de backend. O núcleo funcional está implementado; os próximos passos mais relevantes são hardening de infraestrutura e, depois, integração com Machine Learning.
+
+---
 
 ## Funcionalidades
 
-* Cadastro e autenticação de usuários
-* Autenticação utilizando JWT
-* Gerenciamento das próprias informações do usuário
-* Criação, atualização, consulta e exclusão de contas
-* Criação e consulta de transações
-* Controle automático do saldo das contas
+* Cadastro, atualização e remoção de usuários
+* Autenticação com JWT e proteção de endpoints
+* Hash de senhas utilizando Argon2 via `pwdlib`
+* Criação, consulta, atualização e remoção de contas
+* Registro de transações de entrada e saída
+* Atualização automática do saldo das contas
 * Validação de saldo insuficiente
-* Paginação na listagem de transações
-* Filtros de transações
-* Dashboard financeiro
-* Resumo de entradas, saídas e resultado
-* Agrupamento de movimentações por categoria
-* Histórico financeiro por data
-* Distribuição de despesas por categoria
-* Geração de insights financeiros baseados em regras
-* Persistência utilizando MySQL
-* Ambiente de execução utilizando Docker
-* Testes automatizados com Pytest
+* Isolamento de dados por usuário autenticado
+* Filtros por tipo, categoria e período
+* Paginação de transações com `limit` e `offset`
+* Dashboard financeiro com resumo, categorias e histórico
+* Análise de concentração de despesas e geração de insights baseados em regras
+* Transações recorrentes com processamento automático
+* Registro das ocorrências de transações recorrentes, incluindo falhas
+* Agendamento do processamento recorrente com APScheduler
+* Testes automatizados da API e das regras de negócio
+* Configuração para Docker
+* Estrutura de migrations com Alembic
 
-## Tecnologias utilizadas
+---
+
+## Stack
+
+### Backend
 
 * Python 3.13
 * FastAPI
-* SQLAlchemy
+* Pydantic
+* SQLAlchemy 2
+
+### Banco de dados
+
 * MySQL
 * PyMySQL
-* Pydantic
-* Pydantic Settings
-* PyJWT
-* pwdlib + Argon2
+
+### Segurança
+
+* JWT
+* `pwdlib` + Argon2
+
+### Automação e infraestrutura
+
+* APScheduler
+* Docker
 * Uvicorn
+* Alembic
+
+### Qualidade e desenvolvimento
+
 * Poetry
 * Pytest
-* pytest-cov
+* Pytest-Cov
 * Ruff
-* Taskipy
-* Docker
-* Docker Compose
+
+---
 
 ## Arquitetura
 
-O projeto utiliza uma arquitetura baseada na separação de responsabilidades:
+A aplicação utiliza uma arquitetura em camadas, com responsabilidades separadas entre HTTP, regras de negócio, persistência e infraestrutura.
 
 ```text
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
-SQLAlchemy
-    ↓
-MySQL
+                     HTTP Request
+                          │
+                          ▼
+                   ┌─────────────┐
+                   │ Controllers │
+                   └──────┬──────┘
+                          │
+                          ▼
+                   ┌─────────────┐
+                   │  Services   │
+                   │ Business    │
+                   │   Rules     │
+                   └──────┬──────┘
+                          │
+                          ▼
+                   ┌─────────────┐
+                   │ Repositories│
+                   │ Persistence │
+                   └──────┬──────┘
+                          │
+                          ▼
+                   ┌─────────────┐
+                   │ SQLAlchemy  │
+                   └──────┬──────┘
+                          │
+                          ▼
+                       MySQL
 ```
 
-### Controller
+### Camadas
 
-Responsável por receber as requisições HTTP, validar os parâmetros através dos schemas e direcionar a operação para o Service.
+**Controllers**
 
-### Service
+Responsáveis pela interface HTTP, validação via schemas e composição das dependências. A maior parte da lógica de negócio fica fora dessa camada.
 
-Responsável pelas regras de negócio e pelo processamento dos dados retornados pelos repositories.
+**Services**
 
-### Repository
+Concentram regras como atualização de saldo, autorização por usuário, processamento de recorrências e geração de análises do dashboard.
 
-Responsável pelo acesso aos dados e pela construção das consultas utilizando SQLAlchemy.
+**Repositories**
 
-### Model
+Abstraem o acesso ao banco e concentram queries e operações de persistência.
 
-Representa as entidades persistidas no banco de dados.
+**Models**
 
-### Schema
+Representam as entidades persistidas no banco através do SQLAlchemy ORM.
 
-Define os formatos de entrada e saída da API e auxilia na validação dos dados.
+**Schemas**
 
-Essa divisão permite que cada camada possua uma responsabilidade específica, facilitando manutenção, testes e evolução do projeto.
+Definem contratos de entrada e saída da API usando Pydantic.
 
-## Estrutura do projeto
+**Mappers**
+
+Fazem a transformação entre entidades ORM e o formato exposto pela API quando os nomes internos e externos são diferentes.
+
+**Dependencies**
+
+Compondo repositories e services através da injeção de dependências do FastAPI.
+
+**Core**
+
+Reúne infraestrutura transversal, como configuração, segurança, banco de dados, cálculo de recorrências e scheduler.
+
+---
+
+## Estrutura
 
 ```text
-app/
+Finance-Core/
+├── app/
+│   └── main.py
 ├── controllers/
-│   ├── accounts_controller.py
-│   ├── auth_controller.py
-│   ├── dashboard_controller.py
-│   ├── transactions_controller.py
-│   └── users_controller.py
-│
 ├── core/
-│   ├── base.py
-│   ├── database.py
-│   ├── security.py
-│   └── settings.py
-│
 ├── dependencies/
-│   ├── accounts.py
-│   ├── auth.py
-│   ├── dashboard.py
-│   ├── transaction.py
-│   └── users.py
-│
 ├── mappers/
-│   ├── conta_mapper.py
-│   └── transaction_mapper.py
-│
+├── migrations/
+│   └── versions/
 ├── models/
-│   ├── contas.py
-│   ├── transacoes.py
-│   └── users.py
-│
 ├── repositories/
-│   ├── contas_repository.py
-│   ├── dashboard_repository.py
-│   ├── transacao_repository.py
-│   └── users_repository.py
-│
 ├── schemas/
-│   ├── auth_schema.py
-│   ├── conta_schema.py
-│   ├── dashboard_schema.py
-│   ├── transaction_schema.py
-│   └── user_schema.py
-│
 ├── services/
-│   ├── accounts_service.py
-│   ├── dashboard_service.py
-│   ├── transactions_service.py
-│   └── users_service.py
-│
-└── main.py
-
-tests/
-├── conftest.py
-├── test_accounts.py
-├── test_auth.py
-├── test_transactions.py
-└── test_users.py
+├── tests/
+├── alembic.ini
+├── db.sql
+├── dockerfile
+├── poetry.lock
+├── pyproject.toml
+└── README.md
 ```
+
+---
+
+## Domínio
+
+O fluxo principal de transações é baseado na relação:
+
+```text
+User
+ │
+ └── Contas
+      │
+      ├── Transacoes
+      │
+      └── TransacoesRecorrentes
+             │
+             └── OcorrenciasRecorrentes
+```
+
+Uma transação altera o saldo da conta dentro da mesma unidade de trabalho do banco:
+
+```text
+Entrada  → saldo += valor
+Saída    → saldo -= valor
+```
+
+Saídas que ultrapassariam o saldo disponível são rejeitadas.
+
+Transações recorrentes possuem uma `proxima_data`. O scheduler procura recorrências vencidas, cria a ocorrência correspondente, tenta gerar a transação e registra o resultado como realizada ou falhou.
+
+---
 
 ## Autenticação
 
-A API utiliza JWT para autenticação.
+O login utiliza OAuth2 Password Flow do FastAPI e gera um JWT contendo o usuário autenticado.
 
-Após realizar o login, o usuário recebe um token de acesso que deve ser enviado nas requisições protegidas:
+As rotas protegidas utilizam:
 
-```http
+```text
 Authorization: Bearer <token>
 ```
 
-Os recursos financeiros são associados ao usuário autenticado. Dessa forma, operações sobre contas e transações são realizadas considerando o usuário identificado pelo token.
+As senhas não são armazenadas em texto puro. O projeto utiliza Argon2 através do `pwdlib`.
+
+---
 
 ## Endpoints
 
-### Autenticação
+### Auth
 
-| Método | Endpoint      | Descrição                         |
-| ------ | ------------- | --------------------------------- |
-| POST   | `/auth/login` | Realiza a autenticação do usuário |
+| Método | Endpoint      | Descrição                            |
+| ------ | ------------- | ------------------------------------ |
+| POST   | `/auth/login` | Autentica o usuário e retorna um JWT |
 
-### Usuários
+### Users
 
-| Método | Endpoint    | Descrição                                |
-| ------ | ----------- | ---------------------------------------- |
-| POST   | `/users`    | Cria um novo usuário                     |
-| GET    | `/users/me` | Retorna os dados do usuário autenticado  |
-| PATCH  | `/users/me` | Atualiza os dados do usuário autenticado |
-| DELETE | `/users/me` | Remove o usuário autenticado             |
+| Método | Endpoint    | Descrição                             |
+| ------ | ----------- | ------------------------------------- |
+| POST   | `/users`    | Cria um usuário                       |
+| GET    | `/users/me` | Retorna o usuário autenticado         |
+| PATCH  | `/users/me` | Atualiza dados do usuário autenticado |
+| DELETE | `/users/me` | Remove o usuário autenticado          |
 
-### Contas
+### Accounts
 
-| Método | Endpoint               | Descrição                              |
-| ------ | ---------------------- | -------------------------------------- |
-| POST   | `/accounts`            | Cria uma conta                         |
-| GET    | `/accounts`            | Lista as contas do usuário autenticado |
-| PATCH  | `/accounts/{conta_id}` | Atualiza uma conta                     |
-| DELETE | `/accounts/{conta_id}` | Remove uma conta                       |
+| Método | Endpoint               | Descrição                |
+| ------ | ---------------------- | ------------------------ |
+| POST   | `/accounts`            | Cria uma conta           |
+| GET    | `/accounts/{conta_id}` | Consulta uma conta       |
+| PATCH  | `/accounts/{conta_id}` | Atualiza o nome da conta |
+| DELETE | `/accounts/{conta_id}` | Remove uma conta         |
 
-### Transações
+### Transactions
 
-| Método | Endpoint        | Descrição                      |
-| ------ | --------------- | ------------------------------ |
-| POST   | `/transactions` | Cria uma transação             |
-| GET    | `/transactions` | Lista as transações do usuário |
+| Método | Endpoint                            | Descrição                                |
+| ------ | ----------------------------------- | ---------------------------------------- |
+| POST   | `/accounts/{conta_id}/transactions` | Cria uma transação                       |
+| GET    | `/accounts/{conta_id}/transactions` | Lista transações com filtros e paginação |
 
-A listagem de transações permite paginação e filtros de acordo com os parâmetros implementados na API.
-
-Exemplo:
+Filtros disponíveis na listagem:
 
 ```text
-/transactions?limit=10
+?type=entrada
+?category=Mercado
+?start_date=2026-09-01
+?end_date=2026-09-30
+?limit=20
+?offset=0
 ```
 
-## Dashboard
+### Dashboard
 
-O Dashboard concentra consultas analíticas sobre as movimentações financeiras do usuário.
+| Método | Endpoint              | Descrição                                              |
+| ------ | --------------------- | ------------------------------------------------------ |
+| GET    | `/dashboard/summary`  | Totais de entradas, saídas, resultado e saldo          |
+| GET    | `/dashboard/category` | Agrupamento por categoria e tipo                       |
+| GET    | `/dashboard/history`  | Evolução diária do saldo no período                    |
+| GET    | `/dashboard/analysis` | Distribuição de despesas e insights baseados em regras |
 
-As consultas podem receber filtros de período através dos parâmetros `start_date` e `end_date`.
+Os endpoints de dashboard utilizam `start_date` e `end_date` como filtros de período.
 
-| Método | Endpoint              | Descrição                                                    |
-| ------ | --------------------- | ------------------------------------------------------------ |
-| GET    | `/dashboard/summary`  | Retorna saldo total, entradas, saídas e resultado do período |
-| GET    | `/dashboard/category` | Agrupa as movimentações por categoria e tipo                 |
-| GET    | `/dashboard/history`  | Retorna o histórico diário de entradas e saídas              |
-| GET    | `/dashboard/analysis` | Retorna a distribuição das despesas e insights financeiros   |
+### Transações recorrentes
 
-### `/dashboard/summary`
+| Método | Endpoint                                             | Descrição                               |
+| ------ | ---------------------------------------------------- | --------------------------------------- |
+| POST   | `/transactions/recurring`                            | Cria uma recorrência                    |
+| GET    | `/transactions/recurring`                            | Lista recorrências, com filtro de ativo |
+| GET    | `/transactions/recurring/{recurring_transaction_id}` | Consulta uma recorrência                |
+| PATCH  | `/transactions/recurring/{recurring_transaction_id}` | Atualiza uma recorrência                |
 
-Retorna um resumo financeiro do período informado.
-
-Exemplo:
+Frequências disponíveis:
 
 ```text
-/dashboard/summary?start_date=2026-08-01&end_date=2026-08-31
+semanal
+quinzenal
+mensal
 ```
 
-Resposta:
+---
 
-```json
-{
-    "saldo_total": "233000.00",
-    "total_entradas": "2000.00",
-    "total_saidas": "16000.00",
-    "resultado": "-14000.00"
-}
-```
+## Dashboard e análise
 
-O `saldo_total` representa o saldo atual das contas do usuário, enquanto o `resultado` representa:
+O dashboard não é apenas uma camada de apresentação. Parte da análise é calculada no backend a partir das transações do período.
+
+Entre os dados produzidos estão:
+
+* total de entradas e saídas
+* resultado financeiro do período
+* distribuição de despesas por categoria
+* histórico diário de movimentação e saldo
+* concentração de despesas
+* insights derivados de regras de negócio
+
+Exemplos de regras implementadas:
 
 ```text
-resultado = entradas - saídas
+NEGATIVE_RESULT
+POSITIVE_RESULT
+HIGH_CATEGORY_CONCENTRATION
+MAIN_EXPENSE_CATEGORY
+TOP_THREE_CONCENTRATION
 ```
 
-### `/dashboard/category`
+Essa camada foi estruturada de forma determinística, deixando espaço para uma futura evolução para análises estatísticas e modelos de Machine Learning.
 
-Agrupa as movimentações financeiras por categoria e tipo.
-
-Exemplo:
-
-```json
-[
-    {
-        "category": "Aluguel da empresa",
-        "type": "saida",
-        "total": "16000.00"
-    },
-    {
-        "category": "Salário",
-        "type": "entrada",
-        "total": "2000.00"
-    }
-]
-```
-
-### `/dashboard/history`
-
-Apresenta as movimentações agrupadas por data.
-
-Exemplo:
-
-```json
-[
-    {
-        "date": "2026-08-22",
-        "entradas": "0.00",
-        "saidas": "16000.00"
-    },
-    {
-        "date": "2026-08-25",
-        "entradas": "2000.00",
-        "saidas": "0.00"
-    }
-]
-```
-
-### `/dashboard/analysis`
-
-Realiza uma análise das despesas agrupadas por categoria e calcula a participação percentual de cada categoria no total de despesas.
-
-Exemplo:
-
-```json
-{
-    "expense_distribution": [
-        {
-            "category": "Aluguel da empresa",
-            "amount": "16000.00",
-            "percentage": "100.00"
-        }
-    ],
-    "insights": [
-        {
-            "type": "warning",
-            "title": "Alta concentração de gastos",
-            "description": "A categoria Aluguel da empresa representa uma parcela significativa das despesas."
-        }
-    ]
-}
-```
-
-Os insights atuais são gerados através de regras determinísticas baseadas na concentração das despesas. Não há utilização de Machine Learning nessa etapa.
-
-## Regras de negócio atuais
-
-### Controle de saldo
-
-Ao registrar uma entrada, o saldo da conta é incrementado.
-
-Ao registrar uma saída, o saldo é reduzido.
-
-```text
-entrada → saldo + valor
-saída   → saldo - valor
-```
-
-### Saldo insuficiente
-
-Uma saída não pode ser realizada caso a conta não possua saldo suficiente.
-
-### Atomicidade
-
-A criação de transações e a atualização do saldo são tratadas de forma que a operação mantenha consistência entre os dados financeiros.
-
-### Isolamento por usuário
-
-As contas e transações são associadas ao usuário autenticado, evitando que um usuário consulte ou altere dados financeiros pertencentes a outro usuário.
-
-### Valores monetários
-
-Valores financeiros utilizam `Decimal` para evitar problemas de precisão comuns ao utilizar números de ponto flutuante.
-
-## Consultas analíticas
-
-O Dashboard utiliza recursos de agregação do SQL para processar os dados diretamente no banco.
-
-Entre os recursos utilizados estão:
-
-* `SUM` para cálculo de totais
-* `CASE` para separar entradas e saídas
-* `GROUP BY` para agrupamento por categoria e data
-* `ORDER BY` para ordenação dos resultados
-* `COALESCE` para tratamento de resultados nulos
-* `JOIN` para relacionar transações, contas e usuários
-
-Exemplo conceitual:
-
-```sql
-SELECT
-    categoria,
-    SUM(valor)
-FROM transacoes
-GROUP BY categoria;
-```
-
-Essa abordagem evita carregar todas as transações para a aplicação quando uma agregação pode ser realizada diretamente pelo banco de dados.
+---
 
 ## Testes
 
-O projeto utiliza Pytest para testes automatizados.
+A suíte possui testes cobrindo:
 
-Os testes cobrem funcionalidades relacionadas a:
+* autenticação
+* criação e atualização de usuários
+* autorização por usuário
+* contas
+* transações
+* validações de saldo
+* filtros e paginação
+* dashboard
+* transações recorrentes
+* processamento de recorrências
+* falha de recorrência por saldo insuficiente
 
-* Usuários
-* Autenticação
-* Contas
-* Transações
+O projeto atual possui **72 funções de teste** distribuídas em sete arquivos de teste.
 
-Para executar os testes:
+Comandos principais:
+
+```bash
+poetry run task test
+poetry run task coverage
+```
+
+ou diretamente:
 
 ```bash
 poetry run pytest
+poetry run pytest --cov=.
 ```
 
-Para executar os testes com cobertura:
+> A suíte do repositório utiliza SQLite em memória durante os testes para manter o isolamento e reduzir a dependência de infraestrutura externa.
 
-```bash
-poetry run pytest --cov=. -vv
+---
+
+## Migrations
+
+O projeto utiliza Alembic para versionamento da estrutura do banco:
+
+```text
+migrations/
+└── versions/
+    ├── 666a1395a481_define_schema_inicial.py
+    └── a92c76962d7f_adiciona_transacoes_recorrentes.py
 ```
 
-## Qualidade de código
+As migrations registram a evolução do schema junto com o código.
 
-O projeto utiliza Ruff para análise e formatação do código.
+**Nota de manutenção:** a migration inicial atual foi gerada sobre um schema que já existia e, portanto, não representa um bootstrap completo de banco vazio. Antes de utilizar Alembic como única fonte de verdade para provisionamento em novos ambientes, o baseline deve ser normalizado e o `db.sql` deve ser alinhado com o schema atual.
 
-Verificar problemas:
+---
 
-```bash
-poetry run task lint
+## Configuração local
+
+Crie um `.env` na raiz:
+
+```env
+SECRET_KEY=sua_chave_secreta
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+DATABASE_URL=mysql+pymysql://usuario:senha@localhost:3306/finance_core
+ENVIRONMENT=development
+LOG_LEVEL=info
 ```
 
-Corrigir problemas automaticamente:
-
-```bash
-poetry run task fix
-```
-
-Formatar o projeto:
-
-```bash
-poetry run task format
-```
-
-## Como executar o projeto
-
-### Com Poetry
-
-Instale as dependências:
+Depois:
 
 ```bash
 poetry install
-```
-
-Execute a API:
-
-```bash
 poetry run task run
 ```
 
-A API estará disponível em:
-
-```text
-http://localhost:8000
-```
-
-A documentação interativa do FastAPI pode ser acessada em:
+A documentação interativa fica disponível em:
 
 ```text
 http://localhost:8000/docs
 ```
 
-### Com Docker
+O projeto também contém configuração Docker para desenvolvimento. Credenciais e segredos devem permanecer fora do controle de versão.
 
-Para construir e iniciar os containers:
-
-```bash
-docker compose up --build
-```
-
-Para executar em segundo plano:
-
-```bash
-docker compose up --build -d
-```
-
-Para visualizar os logs:
-
-```bash
-docker compose logs -f
-```
+---
 
 ## Comandos úteis
 
 ```bash
-# Instalar dependências
-poetry install
-
-# Executar aplicação
 poetry run task run
-
-# Executar testes
-poetry run pytest
-
-# Executar testes com cobertura
-poetry run pytest --cov=. -vv
-
-# Verificar lint
 poetry run task lint
-
-# Corrigir problemas do Ruff
 poetry run task fix
-
-# Formatar código
 poetry run task format
-
-# Construir containers
-docker compose build
-
-# Iniciar containers
-docker compose up
-
-# Iniciar reconstruindo a imagem
-docker compose up --build
+poetry run task test
+poetry run task coverage
 ```
 
-## Conceitos aplicados
+---
 
-O projeto busca aplicar conceitos utilizados no desenvolvimento de aplicações backend, incluindo:
+## O que este projeto consolidou
 
-* Arquitetura em camadas
-* Separação de responsabilidades
-* Injeção de dependências
-* REST API
-* Autenticação e autorização com JWT
-* Hash seguro de senhas
+O Finance Core foi construído para praticar conceitos que vão além de endpoints CRUD:
+
+* arquitetura em camadas
+* injeção de dependência
+* Repository Pattern
+* Service Layer
 * ORM com SQLAlchemy
-* Consultas SQL e agregações
-* Validação de dados
-* Tratamento de regras de negócio
-* Controle de transações e atomicidade
-* Paginação
-* Filtros
-* Testes automatizados
-* Cobertura de testes
-* Linting e formatação
-* Containerização
-* Variáveis de ambiente
-* Processamento analítico de dados
+* validação com Pydantic
+* autenticação e autorização
+* hashing de senhas
+* tratamento de erros HTTP
+* precisão monetária com `Decimal`
+* transações e atomicidade
+* filtros e paginação
+* agregações SQL
+* regras de negócio determinísticas
+* processamento assíncrono por scheduler
+* versionamento de schema com Alembic
+* testes automatizados
 
-## Roadmap
+---
 
-Próximos passos planejados para evolução do projeto:
+## Próximos passos
 
-* Implementação de Alembic para gerenciamento de migrations
-* Expansão da cobertura de testes do Dashboard
-* Melhorias nas análises financeiras
-* Histórico de saldo e movimentações
-* Melhorias nas validações e mapeamentos
-* Implementação de frontend
-* Evolução da camada de análise financeira
-* Exploração futura de Machine Learning para geração de análises e recomendações
+O projeto já atingiu um ponto em que adicionar funcionalidades indefinidamente tem retorno menor do que consolidar o que existe.
+
+As próximas evoluções mais relevantes são:
+
+1. tornar Alembic a fonte oficial do schema
+2. separar o scheduler da aplicação web em um worker/processo próprio
+3. adicionar controles de concorrência para atualização de saldo
+4. evoluir a análise financeira para estatística e Machine Learning
+
+---
 
 ## Autor
 
 Arthur Rezende
 
-Projeto desenvolvido como estudo prático de desenvolvimento backend, arquitetura de software, bancos de dados e análise de dados.
+Desenvolvido como projeto de estudo e portfólio em backend com Python.
