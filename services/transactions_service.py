@@ -12,7 +12,7 @@ class TransacoesService:
     def criar_transacao(
         self, user_id: int, conta_id: int, transaction: TransactionCreate, commit: bool = True
     ):
-        conta = self.contas_repo.get_by_id(conta_id)
+        conta = self.contas_repo.get_by_id_for_update(conta_id)
 
         if not conta:
             raise HTTPException(status_code=404, detail="Conta não encontrada.")
